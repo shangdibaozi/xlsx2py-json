@@ -160,7 +160,8 @@ def funcBool(mapDict, dctData, chilidDict, data):
 	"""
 	if data is None or (type(data) == str and len(data) == 0):
 		return False
-	return int(data) > 0
+	return float(data) > 0.0001
+	# return int(data) > 0 # 不知道为什么，excel里面的0读取出来的时候是'0.0'
 
 def funcNotBool(mapDict, dctData, chilidDict, data):
 	"""

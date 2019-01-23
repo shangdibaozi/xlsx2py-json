@@ -78,7 +78,8 @@ class ExcelTool:
 		获得excel上指定索引位置上的表
 		"""
 		if index in range(1, len(self.__xlsx.Sheets)+1):
-			return self.__xlsx.Sheets(index)
+			# return self.__xlsx.Sheets(index)
+			return self.__xlsx.Worksheets(index)
 
 		else:
 			return None
@@ -111,7 +112,10 @@ class ExcelTool:
 		"""
 		整排
 		"""
-		return sheet.Cells(1).CurrentRegion.Rows[row].Value[0]
+		rs = sheet.Rows(row + 1)
+		v = rs.Value
+		return v[0]
+		# return sheet.Cells(1).CurrentRegion.Rows[row].Value[0]
 
 	def getSheetRowIters(self, sheet, row):
 		"""
@@ -129,7 +133,8 @@ class ExcelTool:
 		"""
 		整列
 		"""
-		return sheet.Cells(1).CurrentRegion.Columns[col].Value
+		return sheet.Columns(col + 1).Value
+		# return sheet.Cells(1).CurrentRegion.Columns[col].Value
 
 #---------------------------------------------------------------------
 #   使用例子
