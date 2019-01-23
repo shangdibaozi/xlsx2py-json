@@ -570,11 +570,11 @@ def main():
 	sys.exit()
 	
 if __name__ == '__main__':
-	# main()
-	infile = 'E:\\github\\xlsx2py-json\\rpgdemo\\xlsxs\\dialogs.xlsx'
-	outfile = 'E:\\github\\xlsx2py-json\\rpgdemo\\pydatas\\d_dialogs.py'
-	if os.path.isfile(infile):
-		a = xlsx2py(infile, outfile)
-		xlsxtool.exportMenu(EXPORT_INFO_OK)
-		a.run()
+	main()
+	# infile = 'E:\\github\\xlsx2py-json\\rpgdemo\\xlsxs\\dialogs.xlsx'
+	# outfile = 'E:\\github\\xlsx2py-json\\rpgdemo\\pydatas\\d_dialogs.py'
+	# if os.path.isfile(infile):
+	# 	a = xlsx2py(infile, outfile)
+	# 	xlsxtool.exportMenu(EXPORT_INFO_OK)
+	# 	a.run()
 
