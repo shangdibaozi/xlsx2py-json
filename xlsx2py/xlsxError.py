@@ -1,6 +1,6 @@
-# -*- coding: gb2312 -*-
+ï»¿# -*- coding: utf-8 -*-
 """
-´íÎóÅäÖÃÎÄ¼ş
+é”™è¯¯é…ç½®æ–‡ä»¶
 """
 
 from config import *
@@ -10,7 +10,7 @@ import xlsxtool as xt
 
 def except_hook(typ, val, tb):
 	"""
-	traceback´¦Àí,ÏÔÊ¾ÖĞÎÄ:Ê§°Ü
+	tracebackå¤„ç†,æ˜¾ç¤ºä¸­æ–‡:å¤±è´¥
 	"""
 	pywinerr_list = []
 	sys.__excepthook__(typ, val, tb)
@@ -38,7 +38,7 @@ def info_input(index, args = ""):
 
 class XlsxException(Exception):
 	"""
-	Òì³£´¦Àí
+	å¼‚å¸¸å¤„ç†
 	"""
 	def __init__(self, index, msg = ""):
 		print( "ERROR%d:%s, %s"%(index, EXPORT_ERROR[index], xt.value_to_text(msg)) )

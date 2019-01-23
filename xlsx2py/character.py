@@ -1,4 +1,4 @@
-# -*- coding: gb2312 -*-
+﻿# -*- coding: utf-8 -*-
 #
 from syschar import *
 from itemchar import *

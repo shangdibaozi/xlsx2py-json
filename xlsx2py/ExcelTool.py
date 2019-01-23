@@ -1,4 +1,4 @@
-# -*- coding: gb2312 -*-
+ï»¿# -*- coding: utf-8 -*-
 # written by kebiao, 2010/08/20
 
 from win32com.client import Dispatch
@@ -7,8 +7,8 @@ import sys
 
 class ExcelTool:
 	"""
-	¼òµ¥µÄ·â×°excel¸÷ÖÖ²Ù×÷
-	ÏµÍ³ÒªÇó£¬ windowsÏµÍ³£¬ °²×°python2.6ÒÔ¼°pywin32-214.win32-py2.6.exe, ÒÔ¼°ms office
+	ç®€å•çš„å°è£…excelå„ç§æ“ä½œ
+	ç³»ç»Ÿè¦æ±‚ï¼Œ windowsç³»ç»Ÿï¼Œ å®‰è£…python2.6ä»¥åŠpywin32-214.win32-py2.6.exe, ä»¥åŠms office
 	"""
 	def __init__(self, fileName):
 		#try:
@@ -24,13 +24,13 @@ class ExcelTool:
 
 	def getWorkbook(self, forcedClose = False):
 		"""
-		Èç¹ûWorkbookÒÑ¾­´ò¿ªĞèÒªÏÈ¹Ø±Õºó´ò¿ª
-		forcedClose£ºÊÇ·ñÇ¿ÖÆ¹Ø±Õ£¬ºó´ò¿ª¸ÃWorkbook
+		å¦‚æœWorkbookå·²ç»æ‰“å¼€éœ€è¦å…ˆå…³é—­åæ‰“å¼€
+		forcedCloseï¼šæ˜¯å¦å¼ºåˆ¶å…³é—­ï¼Œåæ‰“å¼€è¯¥Workbook
 		"""
 		try:
 			wn  = len(self.__xapp.Workbooks)
 		except:
-			print('³ÌĞòÒì³£ÍË³ö£¬Õâ¿ÉÄÜÊÇÄã´ò¿ª±à¼­ÁË"Ä³ÎÄ¼ş"¶øÃ»ÓĞ±£´æ¸ÃÎÄ¼şÔì³ÉµÄ£¬Çë±£´æ¸ÃÎÄ¼ş')
+			print('ç¨‹åºå¼‚å¸¸é€€å‡ºï¼Œè¿™å¯èƒ½æ˜¯ä½ æ‰“å¼€ç¼–è¾‘äº†"æŸæ–‡ä»¶"è€Œæ²¡æœ‰ä¿å­˜è¯¥æ–‡ä»¶é€ æˆçš„ï¼Œè¯·ä¿å­˜è¯¥æ–‡ä»¶')
 			sys.exit(1)
 
 		for x in range(0, wn):
@@ -41,7 +41,7 @@ class ExcelTool:
 					Workbook.Close(SaveChanges = False)
 				return False
 
-		self.__xlsx = self.__xapp.Workbooks.Open(self.fileName)			#´ò¿ªÎÄ¼ş
+		self.__xlsx = self.__xapp.Workbooks.Open(self.fileName)			#æ‰“å¼€æ–‡ä»¶
 		return True
 
 	def getXApp(self):
@@ -52,7 +52,7 @@ class ExcelTool:
 
 	def close(self, saveChanges = False):
 		"""
-		¹Ø±ÕexcelÓ¦ÓÃ
+		å…³é—­excelåº”ç”¨
 		"""
 		if self.__xapp:
 			self.__xlsx.Close(SaveChanges = saveChanges)
@@ -63,19 +63,19 @@ class ExcelTool:
 
 	def getSheetCount(self):
 		"""
-		»ñµÃ¹¤×÷±í¸öÊı
+		è·å¾—å·¥ä½œè¡¨ä¸ªæ•°
 		"""
 		return self.__xlsx.Sheets.Count
 
 	def getSheetNameByIndex(self, index):
 		"""
-		»ñµÃexcelÉÏÖ¸¶¨Ë÷ÒıÎ»ÖÃÉÏµÄ±íÃû³Æ
+		è·å¾—excelä¸ŠæŒ‡å®šç´¢å¼•ä½ç½®ä¸Šçš„è¡¨åç§°
 		"""
 		return self.getSheetByIndex(index).Name
 
 	def getSheetByIndex(self, index):
 		"""
-		»ñµÃexcelÉÏÖ¸¶¨Ë÷ÒıÎ»ÖÃÉÏµÄ±í
+		è·å¾—excelä¸ŠæŒ‡å®šç´¢å¼•ä½ç½®ä¸Šçš„è¡¨
 		"""
 		if index in range(1, len(self.__xlsx.Sheets)+1):
 			return self.__xlsx.Sheets(index)
@@ -85,54 +85,54 @@ class ExcelTool:
 
 	def getRowCount(self, sheetIndex):
 		"""
-		»ñµÃÒ»ÅÅÓĞ¶àÉÙÔªËØ
+		è·å¾—ä¸€æ’æœ‰å¤šå°‘å…ƒç´ 
 		"""
 		return self.getSheetByIndex(sheetIndex).Cells(1).CurrentRegion.Columns.Count
 
 	def getColCount(self, sheetIndex):
 		"""
-		»ñµÃÒ»ÁĞÓĞ¶àÉÙÔªËØ
+		è·å¾—ä¸€åˆ—æœ‰å¤šå°‘å…ƒç´ 
 		"""
 		return self.getSheetByIndex(sheetIndex).Cells(1).CurrentRegion.Rows.Count
 
 	def getValue(self, sheet, row, col):
 		"""
-		»ñµÃÄ³¸ö¹¤×÷±íµÄÄ³¸öÎ»ÖÃÉÏµÄÖµ
+		è·å¾—æŸä¸ªå·¥ä½œè¡¨çš„æŸä¸ªä½ç½®ä¸Šçš„å€¼
 		"""
 		return sheet.Cells(row, col).Value
 
 	def getText(self, sheet, row, col):
 		"""
-		»ñµÃÄ³¸ö¹¤×÷±íµÄÄ³¸öÎ»ÖÃÉÏµÄÖµ
+		è·å¾—æŸä¸ªå·¥ä½œè¡¨çš„æŸä¸ªä½ç½®ä¸Šçš„å€¼
 		"""
 		return sheet.Cells(row, col).Text
 
 	def getRowValues(self, sheet, row):
 		"""
-		ÕûÅÅ
+		æ•´æ’
 		"""
 		return sheet.Cells(1).CurrentRegion.Rows[row].Value[0]
 
 	def getSheetRowIters(self, sheet, row):
 		"""
-		ĞĞµü´úÆ÷
+		è¡Œè¿­ä»£å™¨
 		"""
 		return sheet.Cells(1).CurrentRegion.Rows
 
 	def getSheetColIters(self, sheet, col):
 		"""
-		ÁĞµü´úÆ÷
+		åˆ—è¿­ä»£å™¨
 		"""
 		return sheet.Cells(1).CurrentRegion.Columns
 
 	def getColValues(self, sheet, col):
 		"""
-		ÕûÁĞ
+		æ•´åˆ—
 		"""
 		return sheet.Cells(1).CurrentRegion.Columns[col].Value
 
 #---------------------------------------------------------------------
-#   Ê¹ÓÃÀı×Ó
+#   ä½¿ç”¨ä¾‹å­
 #---------------------------------------------------------------------
 def main():
 	xbook = ExcelTool("d:\\test1.xlsx")
