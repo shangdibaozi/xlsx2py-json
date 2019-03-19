@@ -280,7 +280,15 @@ class xlsx2py(object):
 						name, sign, funcName = self.headerDict[index][col-1]
 						if '$' in sign and len(val[0]) > 0:
 							self.needReplace({'v':val[0], "pos":(row, col)})
-							v = self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(val[0]))]  #mapDict:key是unicode.key都要转成unicode
+							if ',' in val[0]:
+								nv = val[0].strip()
+								vs = nv.split(',')
+								v = ''
+								for item in vs:
+									v += (self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(item))] + ',')
+								v = v[:-1] # 去掉最后的','
+							else:
+								v = self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(val[0]))]  #mapDict:key是unicode.key都要转成unicode
 						else:
 							v = val[0]
 						if EXPORT_SIGN_DOT in sign and v is None:
@@ -345,8 +353,15 @@ class xlsx2py(object):
 		if isinstance(v, float):	#防止数字报错(1:string) mapDict 是unicode字符串
 			v = str(int(v))
 
-		if v not in self.mapDict:	#检测而不替换
-			self.xlsxClear(EXPORT_ERROR_NOTMAP, (cellData['pos'], v))
+		vs = None
+		if ',' in v:
+			vs = v.split(',')
+		else:
+			vs = [v]
+
+		for v in vs:
+			if v not in self.mapDict:	#检测而不替换
+				self.xlsxClear(EXPORT_ERROR_NOTMAP, (cellData['pos'], v))
 
 	def isKey(self, cellData):
 		if not hasattr(self, "tempKeys"):
@@ -571,8 +586,8 @@ def main():
 	
 if __name__ == '__main__':
 	main()
-	# infile = 'E:\\github\\xlsx2py-json\\rpgdemo\\xlsxs\\dialogs.xlsx'
-	# outfile = 'E:\\github\\xlsx2py-json\\rpgdemo\\pydatas\\d_dialogs.py'
+	# infile = 'E:\\github\\xlsx2py-json\\rpgdemo\\xlsxs\\chessConfig.xlsx'
+	# outfile = 'E:\\github\\xlsx2py-json\\rpgdemo\\pydatas\\d_chessConfig.py'
 	# if os.path.isfile(infile):
 	# 	a = xlsx2py(infile, outfile)
 	# 	xlsxtool.exportMenu(EXPORT_INFO_OK)
