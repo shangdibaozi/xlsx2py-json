@@ -1,5 +1,5 @@
-python xlsx2py data文件 excel文件 
+python xlsx2py data鏂囦欢 excel鏂囦欢 
 
-具体excel导出规则，请参看"tool_rules.txt"
+鍏蜂綋excel瀵煎嚭瑙勫垯锛岃鍙傜湅"tool_rules.txt"
 
 

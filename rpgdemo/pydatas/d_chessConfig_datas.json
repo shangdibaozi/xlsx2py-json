@@ -4,56 +4,68 @@
         "name" : "小磁怪",
         "attribute" : [
             4,
-            1
+            13
         ],
-        "level" : 1,
         "fee" : 1,
         "HP" : 600,
         "MP" : 100,
         "attack" : 40,
-        "attackRate" : 1.2,
+        "attackRate" : 120,
+        "attackType" : 2,
+        "attackRange" : 400,
+        "moveSpeed" : 4.5,
         "defense" : 5,
-        "moveSpeed" : 4,
-        "attackRange" : 1,
-        "nextID" : 2,
-        "skillsID" : ""
+        "spellResistance" : 20,
+        "restoreHP" : 0,
+        "restoreMP" : 0,
+        "dodge" : 0,
+        "hit" : 0,
+        "skillsID" : 0
     },
     "2" : {
         "ID" : 2,
-        "name" : "三和一磁怪",
+        "name" : "波波",
         "attribute" : [
-            13,
-            2
+            5,
+            7
         ],
-        "level" : 2,
-        "fee" : 2,
+        "fee" : 1,
         "HP" : 600,
         "MP" : 100,
         "attack" : 40,
-        "attackRate" : 1.2,
+        "attackRate" : 130,
+        "attackType" : 2,
+        "attackRange" : 400,
+        "moveSpeed" : 5.5,
         "defense" : 5,
-        "moveSpeed" : 4,
-        "attackRange" : 1,
-        "nextID" : 3,
-        "skillsID" : 1.0
+        "spellResistance" : 20,
+        "restoreHP" : 0,
+        "restoreMP" : 0,
+        "dodge" : 0,
+        "hit" : 0,
+        "skillsID" : 1
     },
     "3" : {
         "ID" : 3,
-        "name" : "大磁怪",
+        "name" : "化石翼龙",
         "attribute" : [
-            4,
-            3
+            7,
+            10
         ],
-        "level" : 3,
-        "fee" : 2,
+        "fee" : 1,
         "HP" : 600,
         "MP" : 100,
         "attack" : 40,
-        "attackRate" : 1.2,
+        "attackRate" : 130,
+        "attackType" : 2,
+        "attackRange" : 400,
+        "moveSpeed" : 6.5,
         "defense" : 5,
-        "moveSpeed" : 4,
-        "attackRange" : 1,
-        "nextID" : 0,
-        "skillsID" : 2.0
+        "spellResistance" : 20,
+        "restoreHP" : 0,
+        "restoreMP" : 0,
+        "dodge" : 0,
+        "hit" : 0,
+        "skillsID" : 2
     }
 }

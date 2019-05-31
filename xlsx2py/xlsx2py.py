@@ -87,7 +87,7 @@ class xlsx2py(object):
 		"""
 		something for nothing, 代对表和导入表需要有
 		"""
-		for index in range(1, self.xbook.getSheetCount() + 1):
+		for index in range(0, self.xbook.getSheetCount()):
 			sheetName = self.xbook.getSheetNameByIndex(index)
 			if sheetName == EXPORT_MAP_SHEET:
 				self.__onFindMapSheet(index)
@@ -128,9 +128,9 @@ class xlsx2py(object):
 		for col in range(0, self.xbook.getRowCount(self.mapIndex)):
 			colValues = self.xbook.getColValues(sheet, col)
 			if colValues:
-				for v in  [e for e in colValues[1:] if e[0] and isinstance(e[0], str) and e[0].strip()]:
+				for v in  [e for e in colValues[1:] if e and isinstance(e, str) and e.strip()]:
 					print (v)
-					mapStr = v[0].replace('：', ":")			#中文"："和":"
+					mapStr = v.replace('：', ":")			#中文"："和":"
 					try:
 						k, v  = mapStr.split(":")
 						k = str.strip(k)
@@ -179,7 +179,7 @@ class xlsx2py(object):
 		print(  "检测文件头(第一行)是否正确" )
 		for index in self.__exportSheetIndex:
 			self.sheetKeys = []
-			headList = self.xbook.getRowValues(self.xbook.getSheetByIndex(index), EXPORT_DEFINE_ROW -1 )
+			headList = self.xbook.getRowValues(self.xbook.getSheetByIndex(index), EXPORT_DEFINE_ROW - 1 )
 			enName = []											#检查命名重复临时变量
 			reTuples = []
 
@@ -258,8 +258,8 @@ class xlsx2py(object):
 				sheet = self.xbook.getSheetByIndex(index)
 				self.curProIndex.append(index)
 
-				cols =  self.xbook.getRowCount(index)
-				rows  = self.xbook.getColCount(index)
+				rows =  self.xbook.getRowCount(index)
+				cols  = self.xbook.getColCount(index)
 				if dataName not in self.dctDatas:
 					self.dctDatas[dataName] = {}
 				self.dctData = self.dctDatas[dataName]
@@ -553,10 +553,6 @@ class xlsx2py(object):
 		self.xlsxClose()
 		return
 
-	def getSheetsCounts(self):
-		return reduce(lambda x,y:x+y, \
-			[self.xbook.getColCount(index) for index in self.__exportSheetIndex])
-
 EXPORT_SIGN['.'] = xlsx2py.isNotEmpty
 EXPORT_SIGN['$'] = xlsx2py.needReplace
 EXPORT_SIGN['!'] = xlsx2py.isKey
@@ -586,10 +582,10 @@ def main():
 	
 if __name__ == '__main__':
 	main()
-	# infile = 'E:\\github\\xlsx2py-json\\rpgdemo\\xlsxs\\chessConfig.xlsx'
-	# outfile = 'E:\\github\\xlsx2py-json\\rpgdemo\\pydatas\\d_chessConfig.py'
-	# if os.path.isfile(infile):
-	# 	a = xlsx2py(infile, outfile)
-	# 	xlsxtool.exportMenu(EXPORT_INFO_OK)
-	# 	a.run()
+	infile = 'E:\\github\\xlsx2py-json\\rpgdemo\\xlsxs\\chessConfig.xlsx'
+	outfile = 'E:\\github\\xlsx2py-json\\rpgdemo\\pydatas\\d_chessConfig.py'
+	if os.path.isfile(infile):
+		a = xlsx2py(infile, outfile)
+		xlsxtool.exportMenu(EXPORT_INFO_OK)
+		a.run()
 
