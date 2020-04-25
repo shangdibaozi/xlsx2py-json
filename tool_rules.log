@@ -66,4 +66,5 @@ def func_xxx(data):
 	datas = [sheet1, sheet2, ...]
 
 6：备注
-	与程序相关的变量名请使用英文,谢谢
+	与程序相关的变量名请使用英文
+	代对表的第一行不要写代对关系（普通任务表:normalQuest）
