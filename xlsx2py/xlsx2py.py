@@ -582,10 +582,10 @@ def main():
 	
 if __name__ == '__main__':
 	main()
-	infile = 'E:\\github\\xlsx2py-json\\rpgdemo\\xlsxs\\chessConfig.xlsx'
-	outfile = 'E:\\github\\xlsx2py-json\\rpgdemo\\pydatas\\d_chessConfig.py'
-	if os.path.isfile(infile):
-		a = xlsx2py(infile, outfile)
-		xlsxtool.exportMenu(EXPORT_INFO_OK)
-		a.run()
+	# infile = 'E:\\ComblockEngine\\2\\Games\\Config\\xlsx\\Plant.xlsx'
+	# outfile = 'E:\\ComblockEngine\\2\\Games\\Config\\pydatas\\d_Plant.py'
+	# if os.path.isfile(infile):
+	# 	a = xlsx2py(infile, outfile)
+	# 	xlsxtool.exportMenu(EXPORT_INFO_OK)
+	# 	a.run()
 
