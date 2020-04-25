@@ -5,4 +5,4 @@ ComblockEngine的配置表导出工具
 
 官方配置文件教程：https://www.comblockengine.com/docs/1.0/tools/pyxlsx/
 
-# 分支支持mac和window系统
+# 支持mac和window系统
