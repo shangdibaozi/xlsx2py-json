@@ -476,19 +476,21 @@ class xlsx2py(object):
 			self.xlsxWrite(g_fdatas["globalDefs"])
 
 		for dataName, datas in g_dctDatas.items():
+			# 写py
+			stream = dataName + "="
+			stream += "%s\n" % (datas)
+			self.xlsxWrite(stream)
+
 			# json.dumps在默认情况下，对于非ascii字符生成的是相对应的字符编码，而非原始字符，只需要ensure_ascii = False
 			# sort_keys：是否按照字典排序（a-z）输出，True代表是，False代表否。 
 			# indent=4：设置缩进格数，一般由于Linux的习惯，这里会设置为4。 
 			# separators：设置分隔符，在dic = {'a': 1, 'b': 2, 'c': 3}这行代码里可以看到冒号和逗号后面都带了个空格，这也是因为Python的默认格式也是如此，
 			# 如果不想后面带有空格输出，那就可以设置成separators=(',', ':')，如果想保持原样，可以写成separators=(', ', ': ')。 
-			s = json.dumps(datas, ensure_ascii = False, sort_keys = False, indent = 4, separators = (',', ' : '))
-			stream = dataName + "="
-			#stream += xlsxtool.dict_to_text(datas) + "\n"
-			stream += "%s\n" % (s)
-			self.xlsxWrite(stream)
+			jsonStr = json.dumps(datas, ensure_ascii = False, sort_keys = False, indent = 4, separators = (',', ': '))
 			fname = self.fileHandler.stream.name
 			jsonhandle = codecs.open(fname[:fname.rfind('.')] + "_" + dataName + ".json", "w+",'utf-8')
-			jsonhandle.write("{%s}" % (s[1:-1]))
+			jsonhandle.write("{%s}" % (jsonStr[1:-1]))
+			
 			jsonhandle.close()
 			
 	def writeFoot(self):
@@ -581,11 +583,11 @@ def main():
 	sys.exit()
 	
 if __name__ == '__main__':
-	main()
-	# infile = 'E:\\ComblockEngine\\2\\Games\\Config\\xlsx\\Plant.xlsx'
-	# outfile = 'E:\\ComblockEngine\\2\\Games\\Config\\pydatas\\d_Plant.py'
-	# if os.path.isfile(infile):
-	# 	a = xlsx2py(infile, outfile)
-	# 	xlsxtool.exportMenu(EXPORT_INFO_OK)
-	# 	a.run()
+	# main()
+	infile = 'E:\\ComblockEngine\\2\\Games\\Config\\xlsx\\Plant.xlsx'
+	outfile = 'E:\\ComblockEngine\\2\\Games\\Config\\pydatas\\d_Plant.py'
+	if os.path.isfile(infile):
+		a = xlsx2py(infile, outfile)
+		xlsxtool.exportMenu(EXPORT_INFO_OK)
+		a.run()
 
