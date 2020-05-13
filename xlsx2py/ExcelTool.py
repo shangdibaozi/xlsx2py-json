@@ -12,7 +12,7 @@ class ExcelTool:
 
 	def getWorkbook(self, forcedClose = False):
 		print(self.fileName)
-		self._xlsx = load_workbook(filename = self.fileName)
+		self._xlsx = load_workbook(filename = self.fileName ,data_only=True)
 		return True
 
 
