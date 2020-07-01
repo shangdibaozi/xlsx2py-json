@@ -6,3 +6,7 @@ ComblockEngine的配置表导出工具
 官方配置文件教程：https://www.comblockengine.com/docs/1.0/tools/pyxlsx/
 
 # 支持mac和window系统
+
+
+# TIP:
+- 浮点数保留2位小数

@@ -583,11 +583,11 @@ def main():
 	sys.exit()
 	
 if __name__ == '__main__':
-	# main()
-	infile = 'E:\\ComblockEngine\\2\\Games\\Config\\xlsx\\Plant.xlsx'
-	outfile = 'E:\\ComblockEngine\\2\\Games\\Config\\pydatas\\d_Plant.py'
-	if os.path.isfile(infile):
-		a = xlsx2py(infile, outfile)
-		xlsxtool.exportMenu(EXPORT_INFO_OK)
-		a.run()
+	main()
+	# infile = r'E:\ComblockEngine\2\Games\Config1\xlsx\stall.xlsx'
+	# outfile = r'E:\ComblockEngine\2\Games\Config1\pydatas\d_stall.py'
+	# if os.path.isfile(infile):
+	# 	a = xlsx2py(infile, outfile)
+	# 	xlsxtool.exportMenu(EXPORT_INFO_OK)
+	# 	a.run()
 

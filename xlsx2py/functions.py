@@ -30,12 +30,12 @@ def funcInt(mapDict, dctData, chilidDict, data):
 
 def funcFloat(mapDict, dctData, chilidDict, data):
 	"""
-	返回float数据
+	返回float数据，保留2位小数
 	"""
 	if data is None or (type(data) == str and len(data) == 0):
 		return 0.0
 
-	return float(data)
+	return round(float(data), 2)
 
 def funcStr(mapDict, dctData, chilidDict, data):
 	"""
