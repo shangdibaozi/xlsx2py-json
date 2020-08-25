@@ -269,7 +269,7 @@ class xlsx2py(object):
                 self.dctData = self.dctDatas[dataName]
 
                 # for row in range(3, rows + 1):
-                for row in tqdm.tqdm(range(3, rows + 1)):
+                for row in tqdm.tqdm(range(3, rows + 1), ncols=70):
                     rowval = self.xbook.getRowValues(sheet, row - 1)
                     childDict = {}
                     for col in range(1, cols + 1):
