@@ -6,6 +6,7 @@ import time
 import codecs
 import json
 import copy
+import tqdm
 
 
 from ExcelTool import ExcelTool
@@ -267,7 +268,8 @@ class xlsx2py(object):
                     self.dctDatas[dataName] = {}
                 self.dctData = self.dctDatas[dataName]
 
-                for row in range(3, rows + 1):
+                # for row in range(3, rows + 1):
+                for row in tqdm.tqdm(range(3, rows + 1)):
                     rowval = self.xbook.getRowValues(sheet, row - 1)
                     childDict = {}
                     for col in range(1, cols + 1):
@@ -316,7 +318,6 @@ class xlsx2py(object):
 
                         childDict[name] = v
 
-                    print("当前:%i/%i" % (row, rows))
                     self.dctData[self.tempKeys[-1]] = copy.deepcopy(childDict)
 
                 self.writeHead()
@@ -378,6 +379,7 @@ class xlsx2py(object):
             print("获取表的名字出错", err)
 
         sheetName = SheetName[SheetName.find(config.EXPORT_PREFIX_CHAR) + 1:]
+        print('表：%s' % sheetName)
         if sheetName in self.mapDict:
             # dataName = self.mapDict[sheetName]
             self.hasExportedSheet.append(self.curProIndex[-1])
@@ -470,7 +472,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-    infile = r'E:\github\xlsx2py-json\rpgdemo\xlsxs\stall.xlsx'
+    infile = r'E:\github\xlsx2py-json\dist-sample\xlsx\stall.xlsx'
     outfilePath = r'E:\github\xlsx2py-json\rpgdemo\pydatas\stall'
     # infile = r'E:\ComblockEngine\2\Games\Config1\xlsx\stall.xlsx'
     # outfilePath = r'E:\ComblockEngine\2\Games\Config1\pydatas'
