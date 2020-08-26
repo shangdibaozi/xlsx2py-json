@@ -42,12 +42,15 @@ g_fdatas = {}
 class xlsx2py(object):
     """
     将excel数据导出为py文件 使用过程需要进行编码转换
+
+    targets = 'py|json|lua'
     """
 
-    def __init__(self, infile, outfile):
+    def __init__(self, infile, outfile, targets):
         sys.excepthook = xlsxError.except_hook  # traceback处理,希望输出中文
         self.infile = os.path.abspath(infile)  # 暂存excel文件名
         self.outfile = os.path.abspath(outfile)  # data文件名
+        self.targets = targets
 
     def __initXlsx(self):
         self.xbook = ExcelTool(self.infile)
@@ -160,23 +163,12 @@ class xlsx2py(object):
             return ()
         return reGroups.groups()
 
-    def __convertKeyName(self, name):
-        try:
-            tname = eval(name)
-        except Exception as err:
-            print('不用在意：', err)
-        else:
-            if type(tname) == int or type(tname) == float:
-                return tname
-
-        return name
-
     def __checkDefine(self):
         """
         第一行的个元素是否符合定义格式"name[signs][func]"以及key是否符合规定
         """
-        print("检测文件头(第一行)是否正确")
         for index in self.__exportSheetIndex:
+            print("检测表[%s]文件头(第一行)是否正确" % self.xbook.getSheetNameByIndex(index))
             self.sheetKeys = []
             headList = self.xbook.getRowValues(
                 self.xbook.getSheetByIndex(index), config.EXPORT_DEFINE_ROW - 1)
@@ -192,7 +184,6 @@ class xlsx2py(object):
 
                 if len(reTuple) == 3:  # 定义被分拆为三部分:name, signs, func, signs可以是空
                     name, signs, funcName = reTuple[0], reTuple[1][1:-1], reTuple[2][1:-1]
-                    name = self.__convertKeyName(name)
                     for s in signs:  # 符号定义是否在规则之内
                         if s not in config.EXPORT_ALL_SIGNS:
                             self.xlsxClear(config.EXPORT_ERROR_NOSIGN,
@@ -388,28 +379,34 @@ class xlsx2py(object):
 
     def writeBody(self):
         for dataName, datas in g_dctDatas.items():
-            # json.dumps在默认情况下，对于非ascii字符生成的是相对应的字符编码，而非原始字符，只需要ensure_ascii = False
-            # sort_keys：是否按照字典排序（a-z）输出，True代表是，False代表否。
-            # indent=4：设置缩进格数，一般由于Linux的习惯，这里会设置为4。
-            # separators：设置分隔符，在dic = {'a': 1, 'b': 2, 'c': 3}这行代码里可以看到冒号和逗号后面都带了个空格，这也是因为Python的默认格式也是如此，
-            # 如果不想后面带有空格输出，那就可以设置成separators=(',', ':')，如果想保持原样，可以写成separators=(', ', ': ')。
-            jsonStr = json.dumps(datas, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '))
+            
+            if 'py' in self.targets:
+                # 创建目录
+                pyPath = os.path.join(self.outfile, 'py')
+                if os.path.exists(pyPath) is False:
+                    os.makedirs(pyPath)
+                # 写py
+                pyFilePath = os.path.join(pyPath, 'd_%s.py' % dataName)
+                pyHandle = codecs.open(pyFilePath, 'w+', 'utf-8')
+                pyHandle.write('datas = %s' % str(datas))
+                pyHandle.close()
 
-            # 创建目录
-            if os.path.exists(self.outfile) is False:
-                os.makedirs(self.outfile)
+            if 'json' in self.targets:
+                # json.dumps在默认情况下，对于非ascii字符生成的是相对应的字符编码，而非原始字符，只需要ensure_ascii = False
+                # sort_keys：是否按照字典排序（a-z）输出，True代表是，False代表否。
+                # indent=4：设置缩进格数，一般由于Linux的习惯，这里会设置为4。
+                # separators：设置分隔符，在dic = {'a': 1, 'b': 2, 'c': 3}这行代码里可以看到冒号和逗号后面都带了个空格，这也是因为Python的默认格式也是如此，
+                # 如果不想后面带有空格输出，那就可以设置成separators=(',', ':')，如果想保持原样，可以写成separators=(', ', ': ')。
+                jsonStr = json.dumps(datas, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '))
 
-            # 写py
-            pyFilePath = os.path.join(self.outfile, 'd_%s.py' % dataName)
-            pyHandle = codecs.open(pyFilePath, 'w+', 'utf-8')
-            pyHandle.write('datas = %s' % jsonStr)
-            pyHandle.close()
-
-            # 写json
-            jsonFilePath = os.path.join(self.outfile, 'd_%s.json' % dataName)
-            jsonhandle = codecs.open(jsonFilePath, "w+", 'utf-8')
-            jsonhandle.write("%s" % jsonStr)
-            jsonhandle.close()
+                jsonPath = os.path.join(self.outfile, 'json')
+                if os.path.exists(jsonPath) is False:
+                    os.makedirs(jsonPath)
+                # 写json
+                jsonFilePath = os.path.join(jsonPath, 'd_%s.json' % dataName)
+                jsonhandle = codecs.open(jsonFilePath, "w+", 'utf-8')
+                jsonhandle.write("%s" % jsonStr)
+                jsonhandle.close()
         self.xlsxbyebye()
         print("写完了time:", time.ctime(time.time()))
 
@@ -457,15 +454,16 @@ def main():
         print(main.__doc__, err)
         return
 
-    for infile in sys.argv[2:]:
-        print("开始导表:[%s] max=%i" % (infile, len(sys.argv[2:])))
-        if os.path.isfile(infile):
-            a = xlsx2py(infile, outfile)
-            xlsxtool.exportMenu(config.EXPORT_INFO_OK)
-            a.run()
-        else:
-            xlsxError.error_input(config.EXPORT_ERROR_NOEXISTFILE, (infile,))
-        print('-------------------------------THE END------------------------------------------------')
+    infile = sys.argv[2]
+    print("开始导表:[%s]" % (infile))
+    if os.path.isfile(infile):
+        targets = sys.argv[3:]
+        a = xlsx2py(infile, outfile, targets)
+        xlsxtool.exportMenu(config.EXPORT_INFO_OK)
+        a.run()
+    else:
+        xlsxError.error_input(config.EXPORT_ERROR_NOEXISTFILE, (infile,))
+    print('-------------------------------THE END------------------------------------------------')
 
     sys.exit()
 
@@ -473,10 +471,11 @@ def main():
 if __name__ == '__main__':
     main()
     infile = r'E:\github\xlsx2py-json\dist-sample\xlsx\stall.xlsx'
-    outfilePath = r'E:\github\xlsx2py-json\rpgdemo\pydatas\stall'
+    outfilePath = r'E:\github\xlsx2py-json\dist-sample\datas'
+    targets = 'json|py'
     # infile = r'E:\ComblockEngine\2\Games\Config1\xlsx\stall.xlsx'
     # outfilePath = r'E:\ComblockEngine\2\Games\Config1\pydatas'
     if os.path.isfile(infile):
-        a = xlsx2py(infile, outfilePath)
+        a = xlsx2py(infile, outfilePath, targets)
         xlsxtool.exportMenu(config.EXPORT_INFO_OK)
         a.run()
