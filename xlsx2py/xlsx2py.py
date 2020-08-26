@@ -247,6 +247,7 @@ class xlsx2py(object):
         self.hasExportedSheet = []
 
         for dataName, indexList in self.sheet2Data.items():
+            print('开始处理表：%s' % dataName)
             self.curIndexMax = len(indexList)
             self.curProIndex = []
             for index in indexList:
@@ -260,7 +261,7 @@ class xlsx2py(object):
                 self.dctData = self.dctDatas[dataName]
 
                 # for row in range(3, rows + 1):
-                for row in tqdm.tqdm(range(3, rows + 1), ncols=70):
+                for row in tqdm.tqdm(range(3, rows + 1), ncols=50):
                     rowval = self.xbook.getRowValues(sheet, row - 1)
                     childDict = {}
                     for col in range(1, cols + 1):
@@ -305,19 +306,18 @@ class xlsx2py(object):
                         for ss in sign.replace('$', ''):
                             if len(sv) == 0 and ss == '!':
                                 continue
-                            config.EXPORT_SIGN[ss](self, {"v": v, "pos": (row, col)})
+                            config.EXPORT_SIGN[ss](self, {'tableName': dataName, "v": v, "pos": (row, col)})
 
                         childDict[name] = v
 
                     self.dctData[self.tempKeys[-1]] = copy.deepcopy(childDict)
 
-                self.writeHead()
+            # self.writeHead()
 
             overFunc = self.mapDict.get('overFunc')
             if overFunc is not None:
                 func = getFunc(overFunc)
-                self.dctData = func(
-                    self.mapDict, self.dctDatas, self.dctData, dataName)
+                self.dctData = func(self.mapDict, self.dctDatas, self.dctData, dataName)
                 self.dctDatas[dataName] = self.dctData
 
             g_dctDatas.update(self.dctDatas)
@@ -359,7 +359,7 @@ class xlsx2py(object):
         if cellData['v'] not in self.tempKeys:
             self.tempKeys.append(cellData['v'])
         else:
-            self.xlsxClear(config.EXPORT_ERROR_REPKEY, (cellData['pos'], (self.tempKeys.index(cellData['v']) + 3, cellData['pos'][1]), cellData['v']))
+            self.xlsxClear(config.EXPORT_ERROR_REPKEY, (cellData['tableName'], cellData['pos'], (self.tempKeys.index(cellData['v']) + 3, cellData['pos'][1]), cellData['v']))
 
 
     def writeHead(self):

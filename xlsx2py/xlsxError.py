@@ -46,8 +46,7 @@ class XlsxException(Exception):
     """
 
     def __init__(self, index, msg=""):
-        print("ERROR%d:%s, %s" %
-              (index, config.EXPORT_ERROR[index], xt.value_to_text(msg)))
+        print("ERROR%d:%s, %s" % (index, config.EXPORT_ERROR[index], xt.value_to_text(msg)))
 
         sys.exit(1)
 
