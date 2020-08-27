@@ -385,10 +385,59 @@ class xlsx2py(object):
                 pyPath = os.path.join(self.outfile, 'py')
                 if os.path.exists(pyPath) is False:
                     os.makedirs(pyPath)
+                """
+                dict = {value}
+                value = key:value
+                key = int|float|string
+                value = int|float|string|[value]|dict
+                """
+
                 # 写py
+                strList = []
+                strList.append('datas = {\n')
+                spaces4 = ' ' * 4
+                spaces8 = ' ' * 8
+                for k in datas:
+                    key = k
+                    if isinstance(k, int):
+                        key = str(k)
+                    elif isinstance(k, str):
+                        key = '"%s"' % key
+                    else:
+                        self.xlsxClear(config.EXPORT_ERROR_KEY_FLOAT, dataName)
+
+                    strList.append('%s%s: {\n' % (spaces4, key))
+
+                    for e in datas[k]:
+                        key1 = e
+                        if isinstance(e, int):
+                            key1 = str(e)
+                        elif isinstance(e, str):
+                            key1 = '"%s"' % key1
+                        else:
+                            self.xlsxClear(config.EXPORT_ERROR_KEY_FLOAT, dataName)
+
+                        value = datas[k][e]
+                        if isinstance(value, int) or isinstance(value, float) or isinstance(value, tuple):
+                            value = str(value)
+                        elif isinstance(value, str):
+                            value = '"%s"' % value
+                        else:
+                            self.xlsxClear(config.EXPORT_ERROR_NOFUNC, dataName)
+
+                        strList.append('%s%s: %s' % (spaces8, key1, value))
+                        strList.append(',\n')
+
+                    strList.pop()
+                    strList.append('\n%s}' % spaces4)
+                    strList.append(',\n')
+                
+                strList.pop()
+                strList.append('\n}\n')
                 pyFilePath = os.path.join(pyPath, 'd_%s.py' % dataName)
                 pyHandle = codecs.open(pyFilePath, 'w+', 'utf-8')
-                pyHandle.write('datas = %s' % str(datas))
+                dataStr = ''.join(strList)
+                pyHandle.write(dataStr)
                 pyHandle.close()
 
             if 'json' in self.targets:

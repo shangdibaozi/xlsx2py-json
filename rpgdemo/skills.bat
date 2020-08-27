@@ -1,6 +1,6 @@
 call basePath.bat
 @echo off
-set pydatas=%ktpydatas%/d_skills.py
+set pydatas=%ktpydatas%/
 set excel1=%ktexcels%/xlsxs/skills.xlsx
 echo on
 python3 ../xlsx2py/xlsx2py.py %pydatas% %excel1%
