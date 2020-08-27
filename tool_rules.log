@@ -68,3 +68,12 @@ def func_xxx(data):
 6：备注
 	与程序相关的变量名请使用英文
 	代对表的第一行不要写代对关系（普通任务表:normalQuest）
+
+7: 类型
+整数：funcInt
+浮点数：funcFloat
+字符串：funcStr
+布尔值：funcBool
+整数数组：funcTupleInt
+浮点数数组：funcTupleFloat
+字符串数组：funcTupleStr
