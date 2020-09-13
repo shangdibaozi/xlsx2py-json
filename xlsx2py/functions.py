@@ -198,3 +198,14 @@ def funcFlags(mapDict, dctData, chilidDict, data):
             val |= int(mapDict[x])
 
     return val
+
+
+functionType2PyType = {
+    'funcBool': 'bool',
+    'funcFloat': 'float',
+    'funcInt': 'int',
+    'funcStr': 'str',
+    'funcTupleInt': 'List[int]',
+    'funcTupleStr': 'List[str]',
+    'funcTupleFloat': 'List[float]'
+}

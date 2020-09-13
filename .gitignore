@@ -2,3 +2,6 @@ xlsx2py/__pycache__
 *.spec
 build
 *.exe
+dist/
+dist-sample/
+*.xlsx

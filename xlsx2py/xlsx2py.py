@@ -8,6 +8,7 @@ import json
 import copy
 import tqdm
 
+from typing import List
 
 from ExcelTool import ExcelTool
 import functions
@@ -36,6 +37,7 @@ def getFunc(funcName):
 
 
 g_dctDatas = {}
+g_key2Type = {}
 g_fdatas = {}
 
 
@@ -148,9 +150,8 @@ class xlsx2py(object):
         代对字典生成完毕
         """
         self.mapDict = mapDict
-        return
 
-# 文件头检测
+    # 文件头检测
     def parseDefineLine(self):
         self.__checkDefine()  # 检查定义是否正确
         self.__checkData()  # 检查数据是否符合规则
@@ -258,6 +259,7 @@ class xlsx2py(object):
                 cols = self.xbook.getColCount(index)
                 if dataName not in self.dctDatas:
                     self.dctDatas[dataName] = {}
+                    g_key2Type[dataName] = {}
                 self.dctData = self.dctDatas[dataName]
 
                 # for row in range(3, rows + 1):
@@ -275,6 +277,7 @@ class xlsx2py(object):
                             continue
 
                         name, sign, funcName = self.headerDict[index][col - 1]
+                        g_key2Type[dataName][name] = functions.functionType2PyType[funcName]
                         if '$' in sign and len(val[0]) > 0:
                             self.needReplace({'v': val[0], "pos": (row, col)})
                             if ',' in val[0]:
@@ -311,8 +314,6 @@ class xlsx2py(object):
                         childDict[name] = v
 
                     self.dctData[self.tempKeys[-1]] = copy.deepcopy(childDict)
-
-            # self.writeHead()
 
             overFunc = self.mapDict.get('overFunc')
             if overFunc is not None:
@@ -361,21 +362,6 @@ class xlsx2py(object):
         else:
             self.xlsxClear(config.EXPORT_ERROR_REPKEY, (cellData['tableName'], cellData['pos'], (self.tempKeys.index(cellData['v']) + 3, cellData['pos'][1]), cellData['v']))
 
-
-    def writeHead(self):
-        print("开始写入文件:", time.ctime(time.time()))
-        try:
-            SheetName = self.xbook.getSheetNameByIndex(self.curProIndex[-1])
-        except Exception as err:
-            print("获取表的名字出错", err)
-
-        sheetName = SheetName[SheetName.find(config.EXPORT_PREFIX_CHAR) + 1:]
-        print('表：%s' % sheetName)
-        if sheetName in self.mapDict:
-            # dataName = self.mapDict[sheetName]
-            self.hasExportedSheet.append(self.curProIndex[-1])
-        else:
-            self.xlsxClear(2, (sheetName.encode(config.FILE_CODE),))
 
     def writeBody(self):
         for dataName, datas in g_dctDatas.items():
@@ -434,6 +420,7 @@ class xlsx2py(object):
                 
                 strList.pop()
                 strList.append('\n}\n')
+                self.createTbldataStr(strList, dataName, datas)
                 pyFilePath = os.path.join(pyPath, 'd_%s.py' % dataName)
                 pyHandle = codecs.open(pyFilePath, 'w+', 'utf-8')
                 dataStr = ''.join(strList)
@@ -458,6 +445,30 @@ class xlsx2py(object):
                 jsonhandle.close()
         self.xlsxbyebye()
         print("写完了time:", time.ctime(time.time()))
+
+    def createTbldataStr(self, strList: List[str], dataName, datas):
+        spaces4 = ' ' * 4
+        spaces8 = ' ' * 8
+        strList.append('\nclass Datas:\n')
+        strList.append('%sdef __init__(self):\n%sself._data = None\n\n' % (spaces4, spaces8))
+        strList.append('%sdef __getitem__(self, key):\n%sself._data = datas[key]\n%sreturn self\n\n' % (spaces4, spaces8, spaces8))
+        strList.append('%sdef __contains__(self, key):\n%sreturn key in datas\n\n' % (spaces4, spaces8))
+        strList.append('%sdef keys(self):\n%sreturn datas.keys()\n\n' % (spaces4, spaces8))
+        data1 = datas[list(datas.keys())[0]]
+        isContainList = False
+        for k in data1:
+            vType = g_key2Type[dataName][k]
+            strList.append('%s@property\n%sdef %s(self) -> %s:\n%sreturn self._data[\'%s\']\n\n' % (spaces4, spaces4, k, vType, spaces8, k))
+            if 'List' in vType:
+                isContainList = True
+
+        strList.append('\ntblData = Datas()\n\n')
+        
+        if isContainList:
+            strList.insert(0, 'from typing import List\n')
+
+
+
 
     def xlsxClose(self):
         """
