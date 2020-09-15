@@ -16,6 +16,8 @@ def funcInt(mapDict, dctData, chilidDict, data):
     """
     if len(data) == 0:
         return 0
+    if 'e' in data or 'E' in data:
+        data = eval(data)
     return int(data)
 
 def funcFloat(mapDict, dctData, chilidDict, data):
