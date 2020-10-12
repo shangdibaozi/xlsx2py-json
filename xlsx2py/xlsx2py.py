@@ -53,6 +53,7 @@ class xlsx2py(object):
         self.infile = os.path.abspath(infile)  # 暂存excel文件名
         self.outfile = os.path.abspath(outfile)  # data文件名
         self.targets = targets
+        self.tempKeys = []
 
     def __initXlsx(self):
         self.xbook = ExcelTool(self.infile)
@@ -328,8 +329,10 @@ class xlsx2py(object):
             g_dctDatas.update(self.dctDatas)
 
         self.writeBody()
+        self.tempKeys.clear()
 
     # 符号字典的相关设置EXPORT_SIGN
+
     def isNotEmpty(self, cellData):
         if cellData['v'] is None:
             self.xlsxClear(config.EXPORT_ERROR_NOTNULL, (cellData['pos'], ))
@@ -355,9 +358,6 @@ class xlsx2py(object):
         """
         检测是否有重复的键值
         """
-        if not hasattr(self, "tempKeys"):
-            self.tempKeys = []
-
         if cellData['v'] not in self.tempKeys:
             self.tempKeys.append(cellData['v'])
         else:
@@ -466,9 +466,6 @@ class xlsx2py(object):
         
         if isContainList:
             strList.insert(0, 'from typing import List\n')
-
-
-
 
     def xlsxClose(self):
         """
