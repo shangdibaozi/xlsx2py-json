@@ -262,8 +262,10 @@ class xlsx2py(object):
                     g_key2Type[dataName] = {}
                 self.dctData = self.dctDatas[dataName]
 
+
                 # for row in range(3, rows + 1):
                 for row in tqdm.tqdm(range(3, rows + 1), ncols=50):
+                    keyName: str = None
                     rowval = self.xbook.getRowValues(sheet, row - 1)
                     childDict = {}
                     for col in range(1, cols + 1):
@@ -285,13 +287,11 @@ class xlsx2py(object):
                                 vs = nv.split(',')
                                 v = ''
                                 for item in vs:
-                                    v += (self.mapDict[xlsxtool.GTOUC(
-                                        xlsxtool.val2Str(item))] + ',')
+                                    v += (self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(item))] + ',')
                                 v = v[:-1]  # 去掉最后的','
                             else:
                                 # mapDict:key是unicode.key都要转成unicode
-                                v = self.mapDict[xlsxtool.GTOUC(
-                                    xlsxtool.val2Str(val[0]))]
+                                v = self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(val[0]))]
                         else:
                             v = val[0]
                         if config.EXPORT_SIGN_DOT in sign and v is None:
@@ -309,11 +309,15 @@ class xlsx2py(object):
                         for ss in sign.replace('$', ''):
                             if len(sv) == 0 and ss == '!':
                                 continue
+                            if ss == '!':
+                                keyName = name
+
                             config.EXPORT_SIGN[ss](self, {'tableName': dataName, "v": v, "pos": (row, col)})
 
                         childDict[name] = v
 
-                    self.dctData[self.tempKeys[-1]] = copy.deepcopy(childDict)
+                    if keyName is not None:
+                        self.dctData[childDict[keyName]] = copy.deepcopy(childDict)
 
             overFunc = self.mapDict.get('overFunc')
             if overFunc is not None:
@@ -322,14 +326,8 @@ class xlsx2py(object):
                 self.dctDatas[dataName] = self.dctData
 
             g_dctDatas.update(self.dctDatas)
-            self.__onCheckSheet()
 
         self.writeBody()
-
-    def __onCheckSheet(self):
-        if hasattr(self, "tempKeys"):
-            del self.tempKeys
-        return
 
     # 符号字典的相关设置EXPORT_SIGN
     def isNotEmpty(self, cellData):
@@ -353,7 +351,10 @@ class xlsx2py(object):
             if v not in self.mapDict:  # 检测而不替换
                 self.xlsxClear(config.EXPORT_ERROR_NOTMAP, (cellData['pos'], v))
 
-    def isKey(self, cellData):
+    def checkKey(self, cellData):
+        """
+        检测是否有重复的键值
+        """
         if not hasattr(self, "tempKeys"):
             self.tempKeys = []
 
@@ -361,7 +362,6 @@ class xlsx2py(object):
             self.tempKeys.append(cellData['v'])
         else:
             self.xlsxClear(config.EXPORT_ERROR_REPKEY, (cellData['tableName'], cellData['pos'], (self.tempKeys.index(cellData['v']) + 3, cellData['pos'][1]), cellData['v']))
-
 
     def writeBody(self):
         for dataName, datas in g_dctDatas.items():
@@ -500,7 +500,7 @@ class xlsx2py(object):
 
 config.EXPORT_SIGN['.'] = xlsx2py.isNotEmpty
 config.EXPORT_SIGN['$'] = xlsx2py.needReplace
-config.EXPORT_SIGN['!'] = xlsx2py.isKey
+config.EXPORT_SIGN['!'] = xlsx2py.checkKey
 
 
 def main():
