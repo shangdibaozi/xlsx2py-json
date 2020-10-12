@@ -326,10 +326,10 @@ class xlsx2py(object):
                 self.dctData = func(self.mapDict, self.dctDatas, self.dctData, dataName)
                 self.dctDatas[dataName] = self.dctData
 
+            self.tempKeys.clear()
             g_dctDatas.update(self.dctDatas)
 
         self.writeBody()
-        self.tempKeys.clear()
 
     # 符号字典的相关设置EXPORT_SIGN
 
