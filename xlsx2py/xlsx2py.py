@@ -449,11 +449,11 @@ class xlsx2py(object):
     def createTbldataStr(self, strList: List[str], dataName, datas):
         spaces4 = ' ' * 4
         spaces8 = ' ' * 8
-        strList.append('\nclass Datas:\n')
-        strList.append('%sdef __init__(self):\n%sself._data = None\n\n' % (spaces4, spaces8))
-        strList.append('%sdef __getitem__(self, key):\n%sself._data = datas[key]\n%sreturn self\n\n' % (spaces4, spaces8, spaces8))
-        strList.append('%sdef __contains__(self, key):\n%sreturn key in datas\n\n' % (spaces4, spaces8))
-        strList.append('%sdef keys(self):\n%sreturn datas.keys()\n\n' % (spaces4, spaces8))
+        strList.append('\nclass Data:\n')
+        strList.append('%sdef __init__(self, arg):\n%sself._data = arg\n\n' % (spaces4, spaces8))
+        strList.append('%sdef __getitem__(self, key):\n%sreturn self._data[key]\n\n' % (spaces4, spaces8))
+        strList.append('%sdef __contains__(self, key):\n%sreturn key in self._data\n\n' % (spaces4, spaces8))
+        strList.append('%sdef keys(self):\n%sreturn self._data.keys()\n\n' % (spaces4, spaces8))
         data1 = datas[list(datas.keys())[0]]
         isContainList = False
         for k in data1:
@@ -461,11 +461,23 @@ class xlsx2py(object):
             strList.append('%s@property\n%sdef %s(self) -> %s:\n%sreturn self._data[\'%s\']\n\n' % (spaces4, spaces4, k, vType, spaces8, k))
             if 'List' in vType:
                 isContainList = True
-
-        strList.append('\ntblData = Datas()\n\n')
         
         if isContainList:
             strList.insert(0, 'from typing import List\n')
+
+        strList.append('\n')
+        strList.append('\nclass Datas:\n')
+        strList.append('%sdef __init__(self):\n' % (spaces4))
+        strList.append('%sself._data = {}\n\n' % (spaces8))
+        strList.append('%sdef __getitem__(self, key) -> Data:\n' % (spaces4))
+        strList.append('%sif key not in self._data:\n' % (spaces8))
+        strList.append('%s%sself._data[key] = Data(datas[key])\n' % (spaces8, spaces4))
+        strList.append('%sreturn self._data[key]\n\n' % (spaces8))
+        strList.append('%sdef __contains__(self, key):\n' % (spaces4))
+        strList.append('%sreturn key in datas\n\n' % (spaces8))
+        strList.append('%sdef keys(self):\n' % (spaces4))
+        strList.append('%sreturn datas.keys()\n\n' % (spaces8))
+        strList.append('\ntblData = Datas()\n\n')
 
     def xlsxClose(self):
         """
