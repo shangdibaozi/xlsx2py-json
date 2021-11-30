@@ -3,17 +3,18 @@ import re
 import os
 import signal
 import time
-import codecs
-import json
+# import codecs
+# import json
 import copy
 import tqdm
 
-from typing import List
+# from typing import List
 
 from ExcelTool import ExcelTool
 import functions
 import xlsxtool
 import xlsxError
+import ExportType
 
 import config
 
@@ -37,7 +38,6 @@ def getFunc(funcName):
 
 
 g_dctDatas = {}
-g_key2Type = {}
 g_fdatas = {}
 
 
@@ -260,7 +260,6 @@ class xlsx2py(object):
                 cols = self.xbook.getColCount(index)
                 if dataName not in self.dctDatas:
                     self.dctDatas[dataName] = {}
-                    g_key2Type[dataName] = {}
                 self.dctData = self.dctDatas[dataName]
 
 
@@ -280,7 +279,6 @@ class xlsx2py(object):
                             continue
 
                         name, sign, funcName = self.headerDict[index][col - 1]
-                        g_key2Type[dataName][name] = functions.functionType2PyType[funcName]
                         if '$' in sign and len(val[0]) > 0:
                             self.needReplace({'v': val[0], "pos": (row, col)})
                             if ',' in val[0]:
@@ -365,119 +363,22 @@ class xlsx2py(object):
 
     def writeBody(self):
         for dataName, datas in g_dctDatas.items():
-            
             if 'py' in self.targets:
-                # 创建目录
-                pyPath = os.path.join(self.outfile, 'py')
-                if os.path.exists(pyPath) is False:
-                    os.makedirs(pyPath)
-                """
-                dict = {value}
-                value = key:value
-                key = int|float|string
-                value = int|float|string|[value]|dict
-                """
-
-                # 写py
-                strList = []
-                strList.append('datas = {\n')
-                spaces4 = ' ' * 4
-                spaces8 = ' ' * 8
-                for k in datas:
-                    key = k
-                    if isinstance(k, int):
-                        key = str(k)
-                    elif isinstance(k, str):
-                        key = '"%s"' % key
-                    else:
-                        self.xlsxClear(config.EXPORT_ERROR_KEY_FLOAT, dataName)
-
-                    strList.append('%s%s: {\n' % (spaces4, key))
-
-                    for e in datas[k]:
-                        key1 = e
-                        if isinstance(e, int):
-                            key1 = str(e)
-                        elif isinstance(e, str):
-                            key1 = '"%s"' % key1
-                        else:
-                            self.xlsxClear(config.EXPORT_ERROR_KEY_FLOAT, dataName)
-
-                        value = datas[k][e]
-                        if isinstance(value, int) or isinstance(value, float) or isinstance(value, tuple):
-                            value = str(value)
-                        elif isinstance(value, str):
-                            value = '"%s"' % value
-                        else:
-                            self.xlsxClear(config.EXPORT_ERROR_NOFUNC, dataName)
-
-                        strList.append('%s%s: %s' % (spaces8, key1, value))
-                        strList.append(',\n')
-
-                    strList.pop()
-                    strList.append('\n%s}' % spaces4)
-                    strList.append(',\n')
-                
-                strList.pop()
-                strList.append('\n}\n')
-                self.createTbldataStr(strList, dataName, datas)
-                pyFilePath = os.path.join(pyPath, 'd_%s.py' % dataName)
-                pyHandle = codecs.open(pyFilePath, 'w+', 'utf-8')
-                dataStr = ''.join(strList)
-                pyHandle.write(dataStr)
-                pyHandle.close()
+                try:
+                    ExportType.toPy(self.outfile, dataName, datas)
+                except xlsxError.XlsxException:
+                    print('<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>')
+                finally:
+                    self.xlsxClose()
 
             if 'json' in self.targets:
-                # json.dumps在默认情况下，对于非ascii字符生成的是相对应的字符编码，而非原始字符，只需要ensure_ascii = False
-                # sort_keys：是否按照字典排序（a-z）输出，True代表是，False代表否。
-                # indent=4：设置缩进格数，一般由于Linux的习惯，这里会设置为4。
-                # separators：设置分隔符，在dic = {'a': 1, 'b': 2, 'c': 3}这行代码里可以看到冒号和逗号后面都带了个空格，这也是因为Python的默认格式也是如此，
-                # 如果不想后面带有空格输出，那就可以设置成separators=(',', ':')，如果想保持原样，可以写成separators=(', ', ': ')。
-                jsonStr = json.dumps(datas, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '))
+                ExportType.toJson(self.outfile, dataName, datas)
 
-                jsonPath = os.path.join(self.outfile, 'json')
-                if os.path.exists(jsonPath) is False:
-                    os.makedirs(jsonPath)
-                # 写json
-                jsonFilePath = os.path.join(jsonPath, 'd_%s.json' % dataName)
-                jsonhandle = codecs.open(jsonFilePath, "w+", 'utf-8')
-                jsonhandle.write("%s" % jsonStr)
-                jsonhandle.close()
+            if 'lua' in self.targets:
+                ExportType.toLua(self.outfile, dataName, datas)
+
         self.xlsxbyebye()
         print("写完了time:", time.ctime(time.time()))
-
-    def createTbldataStr(self, strList: List[str], dataName, datas):
-        spaces4 = ' ' * 4
-        spaces8 = ' ' * 8
-        strList.append('\nclass Data:\n')
-        strList.append('%sdef __init__(self, arg):\n%sself._data = arg\n\n' % (spaces4, spaces8))
-        strList.append('%sdef __getitem__(self, key):\n%sreturn self._data[key]\n\n' % (spaces4, spaces8))
-        strList.append('%sdef __contains__(self, key):\n%sreturn key in self._data\n\n' % (spaces4, spaces8))
-        strList.append('%sdef keys(self):\n%sreturn self._data.keys()\n\n' % (spaces4, spaces8))
-        data1 = datas[list(datas.keys())[0]]
-        isContainList = False
-        for k in data1:
-            vType = g_key2Type[dataName][k]
-            strList.append('%s@property\n%sdef %s(self) -> %s:\n%sreturn self._data[\'%s\']\n\n' % (spaces4, spaces4, k, vType, spaces8, k))
-            if 'List' in vType:
-                isContainList = True
-        
-        if isContainList:
-            strList.insert(0, 'from typing import List\n')
-
-        strList.append('\n')
-        strList.append('\nclass Datas:\n')
-        strList.append('%sdef __init__(self):\n' % (spaces4))
-        strList.append('%sself._data = {}\n\n' % (spaces8))
-        strList.append('%sdef __getitem__(self, key) -> Data:\n' % (spaces4))
-        strList.append('%sif key not in self._data:\n' % (spaces8))
-        strList.append('%s%sself._data[key] = Data(datas[key])\n' % (spaces8, spaces4))
-        strList.append('%sreturn self._data[key]\n\n' % (spaces8))
-        strList.append('%sdef __contains__(self, key):\n' % (spaces4))
-        strList.append('%sreturn key in datas\n\n' % (spaces8))
-        strList.append('%sdef keys(self):\n' % (spaces4))
-        strList.append('%sreturn datas.keys()\n\n' % (spaces8))
-        strList.append('\ntblData = Datas()\n\n')
 
     def xlsxClose(self):
         """
