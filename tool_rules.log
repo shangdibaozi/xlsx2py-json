@@ -44,32 +44,11 @@ def func_xxx(data):
 	4.3命令符号 "!"
 	   	表示该列数据为所在行的主key，现在主key只能是1个,如需多个key请在            config.py配置EXPORT_KEY_NUMS
 
-
-5：导出数据格式：
-	某Excel文件有导出表(@表1， @表2, ...)
-	代对表中有带队关系:
-		表1:sheet1
-		表2:sheet2
-		     ...
-	则导出的py文件中存在字典：
-	sheet1 = {
-		key: {...}, 
-		....
-	}
-
-	sheet1 = {
-		key: {...}, 
-		....
-	}
-	...
-
-	datas = [sheet1, sheet2, ...]
-
-6：备注
+5：备注
 	与程序相关的变量名请使用英文
 	代对表的第一行不要写代对关系（普通任务表:normalQuest）
 
-7: 类型
+6: 类型
 整数：funcInt
 浮点数：funcFloat
 字符串：funcStr
