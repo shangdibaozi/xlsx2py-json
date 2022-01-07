@@ -3,12 +3,8 @@ import re
 import os
 import signal
 import time
-# import codecs
-# import json
 import copy
 import tqdm
-
-# from typing import List
 
 from ExcelTool import ExcelTool
 import functions
@@ -57,16 +53,7 @@ class xlsx2py(object):
 
     def __initXlsx(self):
         self.xbook = ExcelTool(self.infile)
-
-        while not self.xbook.getWorkbook(forcedClose=True):
-            xlsxtool.exportMenu(config.EXPORT_INFO_RTEXCEL, OCallback=self.resetXlsx)
-
-    def resetXlsx(self):
-        """
-        输入O(other)的回调
-        关闭已打开的excel，然后重新打开
-        """
-        self.xbook.getWorkbook(forcedClose=True)
+        self.xbook.getWorkbook()
 
     def __initInfo(self):
         self.__exportSheetIndex = []  # 存储可导表的索引
@@ -109,8 +96,6 @@ class xlsx2py(object):
         if len(self.__exportSheetIndex) == 0:
             xlsxError.error_input(config.EXPORT_ERROR_NOSHEET)
 
-        return
-
     def __onFindMapSheet(self, mapIndex):
         self.mapIndex = mapIndex
         return
@@ -125,7 +110,7 @@ class xlsx2py(object):
         """
         生成代对字典， 代对表只有一个
         """
-        mapDict = {}
+        mapDict = self.mapDict
         sheet = self.xbook.getSheetByIndex(self.mapIndex)
         if not sheet:
             return
@@ -143,14 +128,6 @@ class xlsx2py(object):
                         mapDict[k] = v
                     except Exception as errstr:
                         print("waring：需要检查代对表 第%d列, err=%s" % (col, errstr))
-        self.__onConstruct(mapDict)
-        return
-
-    def __onConstruct(self, mapDict):
-        """
-        代对字典生成完毕
-        """
-        self.mapDict = mapDict
 
     # 文件头检测
     def parseDefineLine(self):
@@ -212,8 +189,7 @@ class xlsx2py(object):
                     self.xlsxClear(config.EXPORT_ERROR_HEADER, (self.xbook.getSheetNameByIndex(
                         index).encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
 
-                self.__onCheckSheetHeader(
-                    self.headerDict[index], c, (name, signs, funcName))  # 定义一行经常使用存起来了
+                self.__onCheckSheetHeader(self.headerDict[index], c, (name, signs, funcName))  # 定义一行经常使用存起来了
 
             self.__onCheckDefine()
 
@@ -362,16 +338,14 @@ class xlsx2py(object):
             self.xlsxClear(config.EXPORT_ERROR_REPKEY, (cellData['tableName'], cellData['pos'], (self.tempKeys.index(cellData['v']) + 3, cellData['pos'][1]), cellData['v']))
 
     def writeBody(self):
+        print('writeBody %s' % self.targets)
         for dataName, datas in g_dctDatas.items():
             if 'py' in self.targets:
-                try:
-                    ExportType.toPy(self.outfile, dataName, datas)
-                except xlsxError.XlsxException:
-                    print('<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>')
-                finally:
-                    self.xlsxClose()
+                print('export py')
+                ExportType.toPy(self.outfile, dataName, datas)
 
             if 'json' in self.targets:
+                print('导出json配置')
                 ExportType.toJson(self.outfile, dataName, datas)
 
             if 'lua' in self.targets:
@@ -388,7 +362,6 @@ class xlsx2py(object):
             self.fileHandler.close()
 
         self.xbook.close()
-        return
 
     def xlsxClear(self, errno=0, msg=''):
         """
@@ -405,7 +378,6 @@ class xlsx2py(object):
         正常退出
         """
         self.xlsxClose()
-        return
 
 
 config.EXPORT_SIGN['.'] = xlsx2py.isNotEmpty
@@ -416,7 +388,11 @@ config.EXPORT_SIGN['!'] = xlsx2py.checkKey
 def main():
     """
     使用方法：
-    python3 xlsx2py excelName.xls(x) 输出目录
+    set datas=datas/
+    set excel=xlsx/stall.xlsx
+    set targets=json py
+    echo on
+    xlsx2py.exe %datas% %excel% %targets%
     """
     try:
         outfile = sys.argv[1]
@@ -442,7 +418,7 @@ if __name__ == '__main__':
     main()
     infile = r'E:\github\xlsx2py-json\dist-sample\xlsx\stall.xlsx'
     outfilePath = r'E:\github\xlsx2py-json\dist-sample\datas'
-    targets = 'json|py'
+    targets = ['json', 'py']
     # infile = r'E:\ComblockEngine\2\Games\Config1\xlsx\stall.xlsx'
     # outfilePath = r'E:\ComblockEngine\2\Games\Config1\pydatas'
     if os.path.isfile(infile):

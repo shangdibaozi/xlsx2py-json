@@ -6,12 +6,10 @@ from openpyxl import load_workbook
 class ExcelTool:
 
     def __init__(self, fileName):
-
         self._xlsx = None
-
         self.fileName = os.path.abspath(fileName)
 
-    def getWorkbook(self, forcedClose=False):
+    def getWorkbook(self):
         print(self.fileName)
         self._xlsx = load_workbook(filename=self.fileName, data_only=True)
         return True
@@ -19,7 +17,7 @@ class ExcelTool:
     def getXLSX(self):
         return self._xlsx
 
-    def close(self, saveChanges=False):
+    def close(self):
         if self._xlsx:
             self._xlsx.close()
 
@@ -45,9 +43,6 @@ class ExcelTool:
         row从0开始，col从0开始
         """
         return sheet.cell(row + 1, col + 1).value
-
-    def getText(self, sheet, row, col):
-        pass
 
     def getRowValues(self, sheet, row):
         iters = self._getSheetRowIters(sheet, row + 1)
