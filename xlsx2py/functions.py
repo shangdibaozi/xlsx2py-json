@@ -16,8 +16,15 @@ def funcInt(mapDict, dctData, chilidDict, data):
     """
     if len(data) == 0:
         return 0
+
+    # 16进制
+    if '0x' in data or '0X' in data:
+        return int(data, 16)
+
+    # 科学计数法
     if 'e' in data or 'E' in data:
         data = eval(data)
+    
     return int(data)
 
 def funcFloat(mapDict, dctData, chilidDict, data):
@@ -210,4 +217,12 @@ functionType2PyType = {
     'funcTupleInt': 'List[int]',
     'funcTupleStr': 'List[str]',
     'funcTupleFloat': 'List[float]'
+}
+
+
+functionType2CSharpType = {
+    'funcBool': 'bool',
+    'funcFloat': 'float',
+    'funcInt': 'int',
+    'funcStr': 'string',
 }

@@ -4,6 +4,7 @@ import json
 
 import xlsxError
 import config
+import functions
 
 def checkSubPath(outfile, subFolderName):
     path = os.path.join(outfile, subFolderName)
@@ -87,3 +88,25 @@ def toJson(outfile, dataName, datas):
 
 def toLua(outfile, dataName, datas):
     pass
+
+
+def generateCSharpTypeFile(fileName, outfile, headDict):
+    cSharpPath = checkSubPath(outfile, 'C#')
+
+    strList = []
+    for tbName in headDict:
+        properties = headDict[tbName]
+        oneClass = [f'public class {tbName}\n']
+        oneClass.append('{\n')
+        for propertyInfo in properties.values():
+            if propertyInfo is not None:
+                name, _, funcName = propertyInfo
+                oneClass.append(f'    public {functions.functionType2CSharpType[funcName]} {name};\n')
+        oneClass.append('}\n\n')
+        strList.append(''.join(oneClass))
+
+    cSharpFilePath = os.path.join(cSharpPath, 'd_%s.cs' % fileName)
+    fileHandler = codecs.open(cSharpFilePath, 'w+', 'utf-8')
+    dataStr = ''.join(strList)
+    fileHandler.write(dataStr)
+    fileHandler.close()

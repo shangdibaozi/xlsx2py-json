@@ -56,7 +56,7 @@ class xlsx2py(object):
         self.xbook.getWorkbook()
 
     def __initInfo(self):
-        self.__exportSheetIndex = []  # 存储可导表的索引
+        self.__exportSheetName = []  # 存储可导表的索引
         self.headerDict = {}  # 导出表第一行转为字典
         self.mapDict = {}  # 代对表生成的字典(第一行是代对表说明忽略)
 
@@ -68,54 +68,34 @@ class xlsx2py(object):
         self.__initInfo()  # 初始导表相关
         self.sth4Nth()  # 进入下一个阶段
         self.constructMapDict()  # 生成代对字典
-        self.__onRun()
-
-    def __onRun(self):
-        self.writeLines = 0  # 记录已写入的excel的行数
         self.parseDefineLine()  # 分析文件
 
-# 寻找代对表和标记导入的表
+    # 寻找代对表和标记导入的表
     def sth4Nth(self):
         """
         something for nothing, 代对表和导入表需要有
         """
-        for index in range(0, self.xbook.getSheetCount()):
-            sheetName = self.xbook.getSheetNameByIndex(index)
-            if sheetName == config.EXPORT_MAP_SHEET:
-                self.__onFindMapSheet(index)
-            if sheetName.startswith(config.EXPORT_PREFIX_CHAR):
-                self.__onFindExportSheet(index)
-        self.onSth4Nth()
 
-    def onSth4Nth(self):
-        """
-        """
-        if not hasattr(self, 'mapIndex'):
+        # 获得所有需要导出的表
+        for sheetName in self.xbook.getSheetNames():
+            if sheetName.startswith(config.EXPORT_PREFIX_CHAR):
+                self.__exportSheetName.append(sheetName)
+        
+        # 检查是否有代对表
+        if not self.xbook.getSheetBySheetName(config.EXPORT_MAP_SHEET):
             self.xlsxClear(config.EXPORT_ERROR_NOMAP)
 
-        if len(self.__exportSheetIndex) == 0:
+        # 检查导出表数量
+        if len(self.__exportSheetName) == 0:
             xlsxError.error_input(config.EXPORT_ERROR_NOSHEET)
-
-    def __onFindMapSheet(self, mapIndex):
-        self.mapIndex = mapIndex
-        return
-
-    def __onFindExportSheet(self, Eindex):
-        """
-        完毕
-        """
-        self.__exportSheetIndex.append(Eindex)
 
     def constructMapDict(self):
         """
         生成代对字典， 代对表只有一个
         """
         mapDict = self.mapDict
-        sheet = self.xbook.getSheetByIndex(self.mapIndex)
-        if not sheet:
-            return
-
-        for col in range(0, self.xbook.getRowCount(self.mapIndex)):
+        sheet = self.xbook.getSheetBySheetName(config.EXPORT_MAP_SHEET)
+        for col in range(0, self.xbook.getRowCount(config.EXPORT_MAP_SHEET)):
             colValues = self.xbook.getColValues(sheet, col)
             if colValues:
                 for v in [e for e in colValues[1:] if e and isinstance(e, str) and e.strip()]:
@@ -126,6 +106,7 @@ class xlsx2py(object):
                         k = str.strip(k)
                         v = str.strip(v)
                         mapDict[k] = v
+                        mapDict[v] = f'@{k}'
                     except Exception as errstr:
                         print("waring：需要检查代对表 第%d列, err=%s" % (col, errstr))
 
@@ -146,17 +127,17 @@ class xlsx2py(object):
         """
         第一行的个元素是否符合定义格式"name[signs][func]"以及key是否符合规定
         """
-        for index in self.__exportSheetIndex:
-            print("检测表[%s]文件头(第一行)是否正确" % self.xbook.getSheetNameByIndex(index))
+        for sheetName in self.__exportSheetName:
+            print("检测表[%s]文件头(第一行)是否正确" % sheetName)
             self.sheetKeys = []
             headList = self.xbook.getRowValues(
-                self.xbook.getSheetByIndex(index), config.EXPORT_DEFINE_ROW - 1)
+                self.xbook.getSheetBySheetName(sheetName), config.EXPORT_DEFINE_ROW - 1)
             enName = []  # 检查命名重复临时变量
 
-            self.headerDict[index] = {}
+            self.headerDict[sheetName] = {}
             for c, head in enumerate(headList):
                 if head is None or head.strip() == '':  # 导出表的第一行None, 则这一列将被忽略
-                    self.__onCheckSheetHeader(self.headerDict[index], c, None)
+                    self.headerDict[sheetName][c] = None
                     continue
 
                 reTuple = self.__reCheck(head)
@@ -165,38 +146,28 @@ class xlsx2py(object):
                     name, signs, funcName = reTuple[0], reTuple[1][1:-1], reTuple[2][1:-1]
                     for s in signs:  # 符号定义是否在规则之内
                         if s not in config.EXPORT_ALL_SIGNS:
-                            self.xlsxClear(config.EXPORT_ERROR_NOSIGN,
-                                           (config.EXPORT_DEFINE_ROW, c + 1))
+                            self.xlsxClear(config.EXPORT_ERROR_NOSIGN, (config.EXPORT_DEFINE_ROW, c + 1))
 
                     if config.EXPORT_SIGN_GTH in signs:  # 是否为key
                         self.sheetKeys.append(c)
 
                     if len(self.sheetKeys) > config.EXPORT_KEY_NUMS:  # key是否超过规定的个数
-                        self.xlsxClear(config.EXPORT_ERROR_NUMKEY,
-                                       (config.EXPORT_DEFINE_ROW, c + 1))
+                        self.xlsxClear(config.EXPORT_ERROR_NUMKEY, (config.EXPORT_DEFINE_ROW, c + 1))
 
                     if name not in enName:  # name不能重复
                         enName.append(name)
                     else:
-                        self.xlsxClear(config.EXPORT_ERROR_REPEAT,
-                                       (self.xbook.getSheetNameByIndex(index).encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
+                        self.xlsxClear(config.EXPORT_ERROR_REPEAT, (self.xbook.getSheetBySheetName(sheetName).encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
 
                     if not hasFunc(funcName):  # funcName是否存在
-                        self.xlsxClear(config.EXPORT_ERROR_NOFUNC,
-                                       (xlsxtool.toGBK(funcName), c + 1))
+                        self.xlsxClear(config.EXPORT_ERROR_NOFUNC, (xlsxtool.toGBK(funcName), c + 1))
 
                 else:
-                    self.xlsxClear(config.EXPORT_ERROR_HEADER, (self.xbook.getSheetNameByIndex(
-                        index).encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
+                    self.xlsxClear(config.EXPORT_ERROR_HEADER, (self.xbook.getSheetBySheetName(sheetName).encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
 
-                self.__onCheckSheetHeader(self.headerDict[index], c, (name, signs, funcName))  # 定义一行经常使用存起来了
+                self.headerDict[sheetName][c] = (name, signs, funcName)
 
             self.__onCheckDefine()
-
-        return
-
-    def __onCheckSheetHeader(self, DataDict, col, headerInfo):
-        DataDict[col] = headerInfo
 
     def __onCheckDefine(self):
         if len(self.sheetKeys) != config.EXPORT_KEY_NUMS:  # key也不能少
@@ -204,36 +175,34 @@ class xlsx2py(object):
 
         print("文件头检测正确", time.ctime(time.time()))
 
-    def sheetIndex2Data(self):
+    def sheetName2Data(self):
         self.sheet2Data = {}
-        for index in self.__exportSheetIndex:
-            SheetName = self.xbook.getSheetNameByIndex(index)
-            sheetName = SheetName[SheetName.find(config.EXPORT_PREFIX_CHAR) + 1:]
-            if sheetName in self.mapDict:
-                dataName = self.mapDict[sheetName]
+        for sheetName in self.__exportSheetName:
+            exportSheetName = sheetName[1:]  # 截取表名：@tbname -> tbname
+            if exportSheetName in self.mapDict:
+                dataName = self.mapDict[exportSheetName]  # 拿到要导出的表名：sheetName可能为中文，需要代对表将表名映射出去
                 if dataName in self.sheet2Data:
-                    self.sheet2Data[dataName].append(index)
+                    self.sheet2Data[dataName].append(sheetName)
                 else:
-                    self.sheet2Data[dataName] = [index]
+                    self.sheet2Data[dataName] = [sheetName]
 
     def __checkData(self):
         """
         列数据是否符合命名规范, 生成所需字典
         """
-        self.sheetIndex2Data()
+        self.sheetName2Data()
         self.dctDatas = g_dctDatas
         self.hasExportedSheet = []
 
-        for dataName, indexList in self.sheet2Data.items():
+        for dataName, sheetNameLst in self.sheet2Data.items():
             print('开始处理表：%s' % dataName)
-            self.curIndexMax = len(indexList)
             self.curProIndex = []
-            for index in indexList:
-                sheet = self.xbook.getSheetByIndex(index)
-                self.curProIndex.append(index)
+            for sheetName in sheetNameLst:
+                sheet = self.xbook.getSheetBySheetName(sheetName)
+                self.curProIndex.append(sheetName)
 
-                rows = self.xbook.getRowCount(index)
-                cols = self.xbook.getColCount(index)
+                rows = self.xbook.getRowCount(sheetName)
+                cols = self.xbook.getColCount(sheetName)
                 if dataName not in self.dctDatas:
                     self.dctDatas[dataName] = {}
                 self.dctData = self.dctDatas[dataName]
@@ -251,10 +220,10 @@ class xlsx2py(object):
                         else:
                             val = ("",)
                             
-                        if self.headerDict[index][col - 1] is None:
+                        if self.headerDict[sheetName][col - 1] is None:
                             continue
 
-                        name, sign, funcName = self.headerDict[index][col - 1]
+                        name, sign, funcName = self.headerDict[sheetName][col - 1]
                         if '$' in sign and len(val[0]) > 0:
                             self.needReplace({'v': val[0], "pos": (row, col)})
                             if ',' in val[0]:
@@ -339,17 +308,25 @@ class xlsx2py(object):
 
     def writeBody(self):
         print('writeBody %s' % self.targets)
-        for dataName, datas in g_dctDatas.items():
+        for exportTableName, datas in g_dctDatas.items():
             if 'py' in self.targets:
                 print('export py')
-                ExportType.toPy(self.outfile, dataName, datas)
+                ExportType.toPy(self.outfile, exportTableName, datas)
 
             if 'json' in self.targets:
                 print('导出json配置')
-                ExportType.toJson(self.outfile, dataName, datas)
+                ExportType.toJson(self.outfile, exportTableName, datas)
 
             if 'lua' in self.targets:
-                ExportType.toLua(self.outfile, dataName, datas)
+                ExportType.toLua(self.outfile, exportTableName, datas)
+
+        if 'C#' in self.targets or 'c#' in self.targets:
+            # 将一个excel上所有表声明文件放在一个C#文件内
+            fileName, _ = os.path.splitext(os.path.basename(self.infile))
+            exportTypes = {}
+            for exportTableName, _ in g_dctDatas.items():
+                exportTypes[exportTableName] = self.headerDict[self.mapDict[exportTableName]]
+            ExportType.generateCSharpTypeFile(fileName, self.outfile, exportTypes)
 
         self.xlsxbyebye()
         print("写完了time:", time.ctime(time.time()))
@@ -418,7 +395,7 @@ if __name__ == '__main__':
     main()
     infile = r'E:\github\xlsx2py-json\dist-sample\xlsx\stall.xlsx'
     outfilePath = r'E:\github\xlsx2py-json\dist-sample\datas'
-    targets = ['json', 'py']
+    targets = ['json', 'py', 'C#']
     # infile = r'E:\ComblockEngine\2\Games\Config1\xlsx\stall.xlsx'
     # outfilePath = r'E:\ComblockEngine\2\Games\Config1\pydatas'
     if os.path.isfile(infile):

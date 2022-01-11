@@ -21,6 +21,9 @@ class ExcelTool:
         if self._xlsx:
             self._xlsx.close()
 
+    def getSheetNames(self):
+        return self._xlsx.sheetnames
+
     def getSheetCount(self):
         return len(self._xlsx.sheetnames)
 
@@ -30,13 +33,14 @@ class ExcelTool:
     def getSheetByIndex(self, index):
         return self._xlsx[self.getSheetNameByIndex(index)]
 
-    def getRowCount(self, sheetIndex):
-        sheet = self.getSheetByIndex(sheetIndex)
-        return sheet.max_row
+    def getSheetBySheetName(self, sheetName):
+        return self._xlsx[sheetName]
 
-    def getColCount(self, sheetIndex):
-        sheet = self.getSheetByIndex(sheetIndex)
-        return sheet.max_column
+    def getRowCount(self, sheetName):
+        return self._xlsx[sheetName].max_row
+
+    def getColCount(self, sheetName):
+        return self._xlsx[sheetName].max_column
 
     def getValue(self, sheet, row, col):
         """
