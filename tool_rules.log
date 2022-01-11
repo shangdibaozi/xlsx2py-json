@@ -50,6 +50,8 @@ def func_xxx(data):
 
 6: 类型
 整数：funcInt
+无符号整数：funcUInt
+长整型：funcLong
 浮点数：funcFloat
 字符串：funcStr
 布尔值：funcBool

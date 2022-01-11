@@ -27,6 +27,32 @@ def funcInt(mapDict, dctData, chilidDict, data):
     
     return int(data)
 
+def funcLong(mapDict, dctData, chilidDict, data):
+    return funcInt(mapDict, dctData, chilidDict, data)
+
+def funcUInt(mapDict, dctData, chilidDict, data):
+    """
+    返回int数据
+    """
+    if len(data) == 0:
+        return 0
+
+    # 16进制
+    if '0x' in data or '0X' in data:
+        return int(data, 16)
+
+    # 科学计数法
+    if 'e' in data or 'E' in data:
+        data = eval(data)  # eval返回的是float类型
+    
+    value = int(data)
+
+    if value < 0:
+        raise Exception(f'数值为负：{value}')
+
+    return value
+
+
 def funcFloat(mapDict, dctData, chilidDict, data):
     """
     返回float数据，保留2位小数
@@ -224,5 +250,7 @@ functionType2CSharpType = {
     'funcBool': 'bool',
     'funcFloat': 'float',
     'funcInt': 'int',
+    'funcUInt': 'uint',
     'funcStr': 'string',
+    'funcLong': 'long'
 }
