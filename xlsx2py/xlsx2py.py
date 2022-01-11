@@ -393,7 +393,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-    infile = r'E:\xWorld\trunk\Config\xlsx\VoxelEditor.xlsx'
+    infile = r'E:\github\xlsx2py-json\dist-sample\xlsx\stall.xlsx'
     outfilePath = r'E:\github\xlsx2py-json\dist-sample\datas'
     targets = ['json', 'py', 'C#']
     # infile = r'E:\ComblockEngine\2\Games\Config1\xlsx\stall.xlsx'
