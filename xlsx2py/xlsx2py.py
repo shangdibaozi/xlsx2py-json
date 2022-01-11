@@ -157,13 +157,13 @@ class xlsx2py(object):
                     if name not in enName:  # name不能重复
                         enName.append(name)
                     else:
-                        self.xlsxClear(config.EXPORT_ERROR_REPEAT, (self.xbook.getSheetBySheetName(sheetName).encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
+                        self.xlsxClear(config.EXPORT_ERROR_REPEAT, (sheetName.encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
 
                     if not hasFunc(funcName):  # funcName是否存在
                         self.xlsxClear(config.EXPORT_ERROR_NOFUNC, (xlsxtool.toGBK(funcName), c + 1))
 
                 else:
-                    self.xlsxClear(config.EXPORT_ERROR_HEADER, (self.xbook.getSheetBySheetName(sheetName).encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
+                    self.xlsxClear(config.EXPORT_ERROR_HEADER, (sheetName.encode(config.FILE_CODE), config.EXPORT_DEFINE_ROW, c + 1))
 
                 self.headerDict[sheetName][c] = (name, signs, funcName)
 
@@ -393,7 +393,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-    infile = r's\stall.xlsx'
+    infile = r'E:\xWorld\trunk\Config\xlsx\VoxelEditor.xlsx'
     outfilePath = r'E:\github\xlsx2py-json\dist-sample\datas'
     targets = ['json', 'py', 'C#']
     # infile = r'E:\ComblockEngine\2\Games\Config1\xlsx\stall.xlsx'

@@ -277,5 +277,6 @@ functionType2CSharpType = {
     'funcTupleFloat': 'float[]',
     'funcTupleLong': 'long[]',
     'funcStr': 'string',
+    'funcTupleStr': 'string[]',
     'funcLong': 'long'
 }
