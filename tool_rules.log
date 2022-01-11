@@ -56,5 +56,7 @@ def func_xxx(data):
 字符串：funcStr
 布尔值：funcBool
 整数数组：funcTupleInt
+无符号整数数组：funcTupleUInt
+长整型数组：funcTupleLong
 浮点数数组：funcTupleFloat
 字符串数组：funcTupleStr

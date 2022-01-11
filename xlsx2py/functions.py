@@ -95,6 +95,27 @@ def funcTupleInt(mapDict, dctData, chilidDict, data):
 
     return tuple([int(e) for e in data.split(",") if len(e) > 0])
 
+def funcTupleLong(mapDict, dctData, chilidDict, data):
+    return funcTupleInt(mapDict, dctData, chilidDict, data)
+
+def funcTupleUInt(mapDict, dctData, chilidDict, data):
+    """
+    返回tuple数据
+    """
+    if data is None or (type(data) == str and len(data) == 0):
+        return ()
+
+    arr = []
+    for e in str(data).split(','):
+        if len(e) > 0:
+            val = int(e)
+            if val < 0:
+                raise Exception(f'数值为负：{val}')
+            arr.append(val)
+
+    return tuple(arr)
+
+
 def funcTupleFloat(mapDict, dctData, chilidDict, data):
     """
     返回tuple数据
@@ -251,6 +272,10 @@ functionType2CSharpType = {
     'funcFloat': 'float',
     'funcInt': 'int',
     'funcUInt': 'uint',
+    'funcTupleInt': 'int[]',
+    'funcTupleUInt': 'uint[]',
+    'funcTupleFloat': 'float[]',
+    'funcTupleLong': 'long[]',
     'funcStr': 'string',
     'funcLong': 'long'
 }
