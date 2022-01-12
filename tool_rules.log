@@ -60,3 +60,5 @@ def func_xxx(data):
 长整型数组：funcTupleLong
 浮点数数组：funcTupleFloat
 字符串数组：funcTupleStr
+整型二维数组：func2dInt
+浮点型二维数组：func2dFloat

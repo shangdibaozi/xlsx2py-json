@@ -389,16 +389,3 @@ def main():
     print('-------------------------------THE END------------------------------------------------')
 
     sys.exit()
-
-
-if __name__ == '__main__':
-    main()
-    infile = r'E:\github\xlsx2py-json\dist-sample\xlsx\stall.xlsx'
-    outfilePath = r'E:\github\xlsx2py-json\dist-sample\datas'
-    targets = ['json', 'py', 'C#']
-    # infile = r'E:\ComblockEngine\2\Games\Config1\xlsx\stall.xlsx'
-    # outfilePath = r'E:\ComblockEngine\2\Games\Config1\pydatas'
-    if os.path.isfile(infile):
-        a = xlsx2py(infile, outfilePath, targets)
-        xlsxtool.exportMenu(config.EXPORT_INFO_OK)
-        a.run()

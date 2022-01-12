@@ -1,5 +1,5 @@
 ﻿
-def funcPos2D(mapDict, dctData, chilidDict, data):
+def funcPos2D(mapDict, dctData, childDict, data):
     """
     返回int数据
     """
@@ -10,7 +10,7 @@ def funcPos2D(mapDict, dctData, chilidDict, data):
 
     return (int(data.split(",")[0]), 0, int(data.split(",")[1]))
 
-def funcInt(mapDict, dctData, chilidDict, data):
+def funcInt(mapDict, dctData, childDict, data):
     """
     返回int数据
     """
@@ -27,10 +27,10 @@ def funcInt(mapDict, dctData, chilidDict, data):
     
     return int(data)
 
-def funcLong(mapDict, dctData, chilidDict, data):
-    return funcInt(mapDict, dctData, chilidDict, data)
+def funcLong(mapDict, dctData, childDict, data):
+    return funcInt(mapDict, dctData, childDict, data)
 
-def funcUInt(mapDict, dctData, chilidDict, data):
+def funcUInt(mapDict, dctData, childDict, data):
     """
     返回int数据
     """
@@ -53,7 +53,7 @@ def funcUInt(mapDict, dctData, chilidDict, data):
     return value
 
 
-def funcFloat(mapDict, dctData, chilidDict, data):
+def funcFloat(mapDict, dctData, childDict, data):
     """
     返回float数据，保留2位小数
     """
@@ -62,7 +62,7 @@ def funcFloat(mapDict, dctData, chilidDict, data):
 
     return round(float(data), 2)
 
-def funcStr(mapDict, dctData, chilidDict, data):
+def funcStr(mapDict, dctData, childDict, data):
     """
     返回字符串数据
     """
@@ -76,7 +76,7 @@ def funcStr(mapDict, dctData, chilidDict, data):
         data = data.encode('utf8')
         return str(data)
 
-def funcEval(mapDict, dctData, chilidDict, data):
+def funcEval(mapDict, dctData, childDict, data):
     """
     返回eval数据
     """
@@ -84,7 +84,7 @@ def funcEval(mapDict, dctData, chilidDict, data):
         return ""
     return eval(data)
 
-def funcTupleInt(mapDict, dctData, chilidDict, data):
+def funcTupleInt(mapDict, dctData, childDict, data):
     """
     返回tuple数据
     """
@@ -95,10 +95,10 @@ def funcTupleInt(mapDict, dctData, chilidDict, data):
 
     return tuple([int(e) for e in data.split(",") if len(e) > 0])
 
-def funcTupleLong(mapDict, dctData, chilidDict, data):
-    return funcTupleInt(mapDict, dctData, chilidDict, data)
+def funcTupleLong(mapDict, dctData, childDict, data):
+    return funcTupleInt(mapDict, dctData, childDict, data)
 
-def funcTupleUInt(mapDict, dctData, chilidDict, data):
+def funcTupleUInt(mapDict, dctData, childDict, data):
     """
     返回tuple数据
     """
@@ -116,7 +116,7 @@ def funcTupleUInt(mapDict, dctData, chilidDict, data):
     return tuple(arr)
 
 
-def funcTupleFloat(mapDict, dctData, chilidDict, data):
+def funcTupleFloat(mapDict, dctData, childDict, data):
     """
     返回tuple数据
     """
@@ -127,7 +127,7 @@ def funcTupleFloat(mapDict, dctData, chilidDict, data):
 
     return tuple([float(e) for e in data.split(",") if len(e) > 0])
     
-def funcDict(mapDict, dctData, chilidDict, data):
+def funcDict(mapDict, dctData, childDict, data):
     """
     返回dict数据
     "xx:1'2'3;fff:2'3'4"
@@ -147,7 +147,7 @@ def funcDict(mapDict, dctData, chilidDict, data):
 
     return dict1
 
-def funcTupleStr(mapDict, dctData, chilidDict, data):
+def funcTupleStr(mapDict, dctData, childDict, data):
     """
     返回tuple数据
     """
@@ -157,7 +157,7 @@ def funcTupleStr(mapDict, dctData, chilidDict, data):
     data = str(data)
     return tuple([e for e in data.split(",") if len(e) > 0])
 
-def funcTupleEval(mapDict, dctData, chilidDict, data):
+def funcTupleEval(mapDict, dctData, childDict, data):
     """
     返回tuple数据
     """
@@ -167,7 +167,7 @@ def funcTupleEval(mapDict, dctData, chilidDict, data):
     data = str(data)
     return tuple([eval(e) for e in data.split(",") if len(e) > 0])
 
-def funcTupleEvalMD(mapDict, dctData, chilidDict, data):
+def funcTupleEvalMD(mapDict, dctData, childDict, data):
     """
     返回tuple数据 使用代对表
     """
@@ -181,7 +181,7 @@ def funcTupleEvalMD(mapDict, dctData, chilidDict, data):
         print("函数中发生错误:%s" % errstr)
         return ()
     
-def funcTupleEval1(mapDict, dctData, chilidDict, data):
+def funcTupleEval1(mapDict, dctData, childDict, data):
     """
     返回tuple数据
     1'100/2'100/3'54
@@ -200,7 +200,7 @@ def funcTupleEval1(mapDict, dctData, chilidDict, data):
         ret.append((eval(i), eval(v)))
     return tuple(ret)
     
-def funcBool(mapDict, dctData, chilidDict, data):
+def funcBool(mapDict, dctData, childDict, data):
     """
     返回布尔值
     """
@@ -209,19 +209,19 @@ def funcBool(mapDict, dctData, chilidDict, data):
     return float(data) > 0.0001
     # return int(data) > 0 # 不知道为什么，excel里面的0读取出来的时候是'0.0'
 
-def funcNotBool(mapDict, dctData, chilidDict, data):
+def funcNotBool(mapDict, dctData, childDict, data):
     """
     返回取反的布尔值
     """
-    return not funcBool(mapDict, dctData, chilidDict, data)
+    return not funcBool(mapDict, dctData, childDict, data)
 
-def funcNull(mapDict, dctData, chilidDict, data):
+def funcNull(mapDict, dctData, childDict, data):
     """
     什么也不做 直接返回
     """
     return data
 
-def funcZipFloat(mapDict, dctData, chilidDict, data):
+def funcZipFloat(mapDict, dctData, childDict, data):
     """
     返回float数据
     """
@@ -230,7 +230,7 @@ def funcZipFloat(mapDict, dctData, chilidDict, data):
 
     return int(float(data) * 10000)
 
-def funcUNZipFloat(mapDict, dctData, chilidDict, data):
+def funcUNZipFloat(mapDict, dctData, childDict, data):
     """
     返回float数据
     """
@@ -239,7 +239,7 @@ def funcUNZipFloat(mapDict, dctData, chilidDict, data):
 
     return int(data) / 10000.0
     
-def funcFlags(mapDict, dctData, chilidDict, data):
+def funcFlags(mapDict, dctData, childDict, data):
     """
     返回标记组合数据
     比如： 想在excel上配置标记组合
@@ -256,6 +256,43 @@ def funcFlags(mapDict, dctData, chilidDict, data):
     return val
 
 
+def func2dInt(mapDict, dctData, childDict, data: str):
+    """
+    2维数组
+    """
+    splitData = data.split(']')
+    arr = []
+    for data in splitData:
+        if len(data) == 0:
+            continue
+        data = data.replace('[', '').split(',')
+        subarr = []
+        for e in data:
+            if len(e) == 0:
+                continue
+            subarr.append(funcInt(mapDict, dctData, childDict, e))
+        arr.append(subarr)
+    return arr
+
+def func2dFloat(mapDict, dctData, childDict, data: str):
+    """
+    2维数组
+    """
+    splitData = data.split(']')
+    arr = []
+    for data in splitData:
+        if len(data) == 0:
+            continue
+        data = data.replace('[', '').split(',')
+        subarr = []
+        for e in data:
+            if len(e) == 0:
+                continue
+            subarr.append(funcFloat(mapDict, dctData, childDict, e))
+        arr.append(subarr)
+    return arr
+
+
 functionType2PyType = {
     'funcBool': 'bool',
     'funcFloat': 'float',
@@ -265,7 +302,6 @@ functionType2PyType = {
     'funcTupleStr': 'List[str]',
     'funcTupleFloat': 'List[float]'
 }
-
 
 functionType2CSharpType = {
     'funcBool': 'bool',
@@ -278,5 +314,7 @@ functionType2CSharpType = {
     'funcTupleLong': 'long[]',
     'funcStr': 'string',
     'funcTupleStr': 'string[]',
-    'funcLong': 'long'
+    'funcLong': 'long',
+    'func2dInt': 'int[,]',
+    'func2dFloat': 'float[,]'
 }

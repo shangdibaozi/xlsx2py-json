@@ -48,7 +48,7 @@ def toPy(outfile, dataName, datas):
                 raise xlsxError.xe(config.EXPORT_ERROR_KEY_FLOAT, dataName)
 
             value = datas[k][e]
-            if isinstance(value, int) or isinstance(value, float) or isinstance(value, tuple):
+            if isinstance(value, int) or isinstance(value, float) or isinstance(value, tuple) or isinstance(value, list):
                 value = str(value)
             elif isinstance(value, str):
                 value = '"%s"' % value

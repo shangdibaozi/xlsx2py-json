@@ -5,3 +5,4 @@ build
 dist/
 dist-sample/
 *.xlsx
+xlsx2py/test.py
