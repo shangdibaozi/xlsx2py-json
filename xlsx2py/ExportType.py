@@ -96,7 +96,7 @@ def generateCSharpTypeFile(fileName, outfile, headDict):
     strList = []
     for tbName in headDict:
         properties = headDict[tbName]
-        oneClass = [f'public class {tbName}\n']
+        oneClass = [f'public class Tbl_{tbName}\n']
         oneClass.append('{\n')
         for propertyInfo in properties.values():
             if propertyInfo is not None:
