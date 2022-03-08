@@ -99,14 +99,17 @@ class xlsx2py(object):
             colValues = self.xbook.getColValues(sheet, col)
             if colValues:
                 for v in [e for e in colValues[1:] if e and isinstance(e, str) and e.strip()]:
-                    print(v)
+                    # print(v)
                     mapStr = v.replace('：', ":")  # 中文"："和":"
                     try:
                         k, v = mapStr.split(":")
                         k = str.strip(k)
                         v = str.strip(v)
+                        if k.startswith(config.EXPORT_PREFIX_CHAR) is False:
+                            k = f'@{k}'
+                        
                         mapDict[k] = v
-                        mapDict[v] = f'@{k}'
+                        mapDict[v] = k
                     except Exception as errstr:
                         print("waring：需要检查代对表 第%d列, err=%s" % (col, errstr))
 
@@ -176,15 +179,13 @@ class xlsx2py(object):
         print("文件头检测正确", time.ctime(time.time()))
 
     def sheetName2Data(self):
+        """
+        拿到所有要导出的表
+        """
         self.sheet2Data = {}
         for sheetName in self.__exportSheetName:
-            exportSheetName = sheetName[1:]  # 截取表名：@tbname -> tbname
-            if exportSheetName in self.mapDict:
-                dataName = self.mapDict[exportSheetName]  # 拿到要导出的表名：sheetName可能为中文，需要代对表将表名映射出去
-                if dataName in self.sheet2Data:
-                    self.sheet2Data[dataName].append(sheetName)
-                else:
-                    self.sheet2Data[dataName] = [sheetName]
+            if sheetName in self.mapDict:
+                self.sheet2Data[self.mapDict[sheetName]] = sheetName
 
     def __checkData(self):
         """
@@ -194,74 +195,71 @@ class xlsx2py(object):
         self.dctDatas = g_dctDatas
         self.hasExportedSheet = []
 
-        for dataName, sheetNameLst in self.sheet2Data.items():
+        for dataName in self.sheet2Data:
             print('开始处理表：%s' % dataName)
-            self.curProIndex = []
-            for sheetName in sheetNameLst:
-                sheet = self.xbook.getSheetBySheetName(sheetName)
-                self.curProIndex.append(sheetName)
+            sheetName = self.sheet2Data[dataName]
+            sheet = self.xbook.getSheetBySheetName(sheetName)
 
-                rows = self.xbook.getRowCount(sheetName)
-                cols = self.xbook.getColCount(sheetName)
-                if dataName not in self.dctDatas:
-                    self.dctDatas[dataName] = {}
-                self.dctData = self.dctDatas[dataName]
+            rows = self.xbook.getRowCount(sheetName)
+            cols = self.xbook.getColCount(sheetName)
+            if dataName not in self.dctDatas:
+                self.dctDatas[dataName] = {}
+            self.dctData = self.dctDatas[dataName]
 
+            # for row in range(3, rows + 1):
+            for row in tqdm.tqdm(range(3, rows + 1), ncols=50):
+                keyName: str = None
+                rowval = self.xbook.getRowValues(sheet, row - 1)
+                childDict = {}
+                for col in range(1, cols + 1):
+                    val = rowval[col - 1]
+                    if val is not None:
+                        val = (str(rowval[col - 1]),)
+                    else:
+                        val = ("",)
+                        
+                    if self.headerDict[sheetName][col - 1] is None:
+                        continue
 
-                # for row in range(3, rows + 1):
-                for row in tqdm.tqdm(range(3, rows + 1), ncols=50):
-                    keyName: str = None
-                    rowval = self.xbook.getRowValues(sheet, row - 1)
-                    childDict = {}
-                    for col in range(1, cols + 1):
-                        val = rowval[col - 1]
-                        if val is not None:
-                            val = (str(rowval[col - 1]),)
+                    name, sign, funcName = self.headerDict[sheetName][col - 1]
+                    if '$' in sign and len(val[0]) > 0:
+                        self.needReplace({'v': val[0], "pos": (row, col)})
+                        if ',' in val[0]:
+                            nv = val[0].strip()
+                            vs = nv.split(',')
+                            v = ''
+                            for item in vs:
+                                v += (self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(item))] + ',')
+                            v = v[:-1]  # 去掉最后的','
                         else:
-                            val = ("",)
-                            
-                        if self.headerDict[sheetName][col - 1] is None:
+                            # mapDict:key是unicode.key都要转成unicode
+                            v = self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(val[0]))]
+                    else:
+                        v = val[0]
+                    if config.EXPORT_SIGN_DOT in sign and v is None:
+                        self.xlsxClear(config.EXPORT_ERROR_NOTNULL, (col, row))
+
+                    sv = v
+
+                    func = getFunc(funcName)
+
+                    try:
+                        v = func(self.mapDict, self.dctData, childDict, sv)
+                    except Exception as errstr:
+                        self.xlsxClear(config.EXPORT_ERROR_FUNC, (errstr, funcName, sv, row, col))
+
+                    for ss in sign.replace('$', ''):
+                        if len(sv) == 0 and ss == '!':
                             continue
+                        if ss == '!':
+                            keyName = name
 
-                        name, sign, funcName = self.headerDict[sheetName][col - 1]
-                        if '$' in sign and len(val[0]) > 0:
-                            self.needReplace({'v': val[0], "pos": (row, col)})
-                            if ',' in val[0]:
-                                nv = val[0].strip()
-                                vs = nv.split(',')
-                                v = ''
-                                for item in vs:
-                                    v += (self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(item))] + ',')
-                                v = v[:-1]  # 去掉最后的','
-                            else:
-                                # mapDict:key是unicode.key都要转成unicode
-                                v = self.mapDict[xlsxtool.GTOUC(xlsxtool.val2Str(val[0]))]
-                        else:
-                            v = val[0]
-                        if config.EXPORT_SIGN_DOT in sign and v is None:
-                            self.xlsxClear(config.EXPORT_ERROR_NOTNULL, (col, row))
+                        config.EXPORT_SIGN[ss](self, {'tableName': dataName, "v": v, "pos": (row, col)})
 
-                        sv = v
+                    childDict[name] = v
 
-                        func = getFunc(funcName)
-
-                        try:
-                            v = func(self.mapDict, self.dctData, childDict, sv)
-                        except Exception as errstr:
-                            self.xlsxClear(config.EXPORT_ERROR_FUNC, (errstr, funcName, sv, row, col))
-
-                        for ss in sign.replace('$', ''):
-                            if len(sv) == 0 and ss == '!':
-                                continue
-                            if ss == '!':
-                                keyName = name
-
-                            config.EXPORT_SIGN[ss](self, {'tableName': dataName, "v": v, "pos": (row, col)})
-
-                        childDict[name] = v
-
-                    if keyName is not None:
-                        self.dctData[childDict[keyName]] = copy.deepcopy(childDict)
+                if keyName is not None:
+                    self.dctData[childDict[keyName]] = copy.deepcopy(childDict)
 
             overFunc = self.mapDict.get('overFunc')
             if overFunc is not None:
